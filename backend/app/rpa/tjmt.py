@@ -2,7 +2,7 @@ import re
 import time
 import random
 from typing import Dict, Any, List
-from playwright.sync_api import sync_playwright
+# from playwright.sync_api import sync_playwright # Lazy import
 from bs4 import BeautifulSoup
 from .base import BaseRPA
 
@@ -21,6 +21,11 @@ class TJMTRPA(BaseRPA):
         return (len(clean_query) == 20 and "8.11" in query) or "8.11" in query
 
     def search(self, query: str) -> Dict[str, Any]:
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:
+            return {"error": f"Playwright not available: {str(e)}", "results": []}
+
         with sync_playwright() as p:
             # Launch browser (headless=True para produção)
             browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])

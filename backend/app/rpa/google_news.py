@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from playwright.sync_api import sync_playwright
+# from playwright.sync_api import sync_playwright # Lazy import
 import time
 import re
 from app.rpa.base import BaseRPA
@@ -49,6 +49,7 @@ class GoogleNewsRPA(BaseRPA):
     def search(self, query: str, max_pages: int = 1) -> Dict[str, Any]:
         results = []
         try:
+            from playwright.sync_api import sync_playwright
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
                 context = browser.new_context(

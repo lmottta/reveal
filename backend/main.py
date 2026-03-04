@@ -29,6 +29,44 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 def health_check():
     return {"status": "ok"}
 
+@app.get("/diagnostics")
+def diagnostics():
+    checks = {
+        "playwright": False,
+        "supabase": False,
+        "lxml": False,
+        "env_vars": {}
+    }
+    
+    # Check Playwright
+    try:
+        from playwright.sync_api import sync_playwright
+        checks["playwright"] = True
+    except ImportError as e:
+        checks["playwright_error"] = str(e)
+        
+    # Check Supabase
+    try:
+        from app.core.supabase import get_supabase
+        client = get_supabase()
+        checks["supabase"] = client is not None
+    except Exception as e:
+        checks["supabase_error"] = str(e)
+
+    # Check lxml
+    try:
+        import lxml
+        checks["lxml"] = True
+    except ImportError as e:
+        checks["lxml_error"] = str(e)
+
+    # Check Env Vars (safe list)
+    safe_vars = ["SUPABASE_URL", "PROJECT_NAME", "API_V1_STR"]
+    for var in safe_vars:
+        checks["env_vars"][var] = bool(os.getenv(var))
+        
+    return checks
+
 # Mount static files
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):

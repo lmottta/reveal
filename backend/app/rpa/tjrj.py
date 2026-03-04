@@ -1,6 +1,6 @@
 import re
 from typing import Dict, Any, List
-from playwright.sync_api import sync_playwright
+# from playwright.sync_api import sync_playwright # Lazy import
 from .base import BaseRPA
 from bs4 import BeautifulSoup
 
@@ -17,6 +17,11 @@ class TJRJRPA(BaseRPA):
         return bool(re.match(r"\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}", query))
 
     def search(self, query: str) -> Dict[str, Any]:
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:
+            return {"error": f"Playwright not available: {str(e)}", "results": []}
+
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
             context = browser.new_context(

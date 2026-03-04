@@ -1,12 +1,16 @@
 import logging
-from playwright.sync_api import sync_playwright
+# from playwright.sync_api import sync_playwright # Lazy import
 import time
 import random
 
 class GoogleWebRPA:
     def search(self, query):
         results = []
-        
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:
+            return {"error": f"Playwright not available: {str(e)}", "results": []}
+
         # Clean query just in case, but keep formatting for precision if needed
         # For CNJ, sometimes removing punctuation helps, sometimes quotes help.
         # Let's try both if one fails? For now, let's use the exact query.
