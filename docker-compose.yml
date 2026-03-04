@@ -1,6 +1,23 @@
+
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reveal_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      - db
+    restart: unless-stopped
+
   db:
     image: postgres:15-alpine
     container_name: reveal_db
