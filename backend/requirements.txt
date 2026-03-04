@@ -1,0 +1,16 @@
+requests
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dotenv
+playwright
+beautifulsoup4
+lxml
+supabase
+postgrest
+gotrue
+realtime
+storage3
+httpx
+pydantic-settings

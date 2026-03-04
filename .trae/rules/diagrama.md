@@ -1,0 +1,65 @@
+# Diagrama Técnico — Consulta Assistida Transitória
+
+┌──────────────────────────────┐
+│        Frontend Web           │
+│  (React / Vue / HTML)         │
+│------------------------------│
+│ - Input controlado            │
+│ - Finalidade declarada        │
+│ - Autenticação básica         │
+└──────────────┬───────────────┘
+               │ HTTPS
+┌──────────────▼───────────────┐
+│        API Backend            │
+│      (FastAPI / Flask)       │
+│------------------------------│
+│ - Validação de inputs        │
+│ - Rate limit                 │
+│ - Logs técnicos              │
+│ - Sessão temporária          │
+│ - Isolamento por fonte       │
+└──────────────┬───────────────┘
+               │
+┌──────────────▼───────────────┐
+│   Orquestrador de Consulta   │
+│------------------------------│
+│ - Seleção de tribunais       │
+│ - Execução sob demanda       │
+│ - Timeout e controle         │
+└──────────────┬───────────────┘
+               │
+      ┌────────┴────────┐
+      │                 │
+┌─────▼─────┐     ┌─────▼─────┐
+│ Módulo TJ │ ... │ Módulo TJ │
+│   UF A    │     │   UF B    │
+│-----------│     │-----------│
+│ - RPA     │     │ - RPA     │
+│ - Leitura │     │ - Leitura │
+│ - Resumo  │     │ - Resumo  │
+└─────┬─────┘     └─────┬─────┘
+      │                 │
+      └────────┬────────┘
+               │
+┌──────────────▼───────────────┐
+│ Normalizador                 │
+│------------------------------│
+│ - Persistir dados sensíveis  │
+│ - Retornar informações       |
+    relevantes                 │
+│ - Alimentar catálogo         │
+└──────────────┬───────────────┘
+               │
+      ┌────────▼────────┐
+      │  PostgreSQL DB  │
+      │ (Docker Local)  │
+      └────────┬────────┘
+               │
+┌──────────────▼───────────────┐
+│ Resultado Transitório        │
+│------------------------------│
+│ - Dados relevantes (nome,    |
+|    endereço possível e crime)|               │
+│ - Vinculado à sessão         │
+│                              │
+└──────────────────────────────┘

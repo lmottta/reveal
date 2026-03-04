@@ -1,0 +1,723 @@
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 42
+Committing batch of 33 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://agenciabrasil.ebc.com.br/direitos-humanos/noticia/2026-02/influenciador-hytalo-santos-e-condenado-por-exploracao-sexual-infantil) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 5131 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 42, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3289 characters truncated) ... uWLud1clQhnkQfYwke1iSSR8NsQcSDTwpUMNysz2v+yBbEdXIZqCHWB9qqhrepw5MIg61lEiAsBtcWNtz7+eAc+Td9YSMbWGkAH3/ADJwez2BYKuGnQkosikatzscBMyqZYJkWMixQMb+dzgin//Z', 'state__0': 'SP', 'source__0': 'Agência Brasil', 'city__0': 'Santos', 'published_date__0': '2 semanas atrás', 'title__0': 'Influenciador Hytalo Santos é condenado por exploração sexual infantil', 'url__0': 'https://agenciabrasil.ebc.com.br/direitos-humanos/noticia/2026-02/influenciador-hytalo-santos-e-condenado-por-exploracao-sexual-infantil', 'search_id__1': 42, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3289 characters truncated) ... uWLud1clQhnkQfYwke1iSSR8NsQcSDTwpUMNysz2v+yBbEdXIZqCHWB9qqhrepw5MIg61lEiAsBtcWNtz7+eAc+Td9YSMbWGkAH3/ADJwez2BYKuGnQkosikatzscBMyqZYJkWMixQMb+dzgin//Z', 'state__1': 'SP', 'source__1': 'Agência Brasil', 'city__1': 'Santos', 'published_date__1': '6 dias atrás', 'title__1': 'Influenciador Hytalo Santos é condenado por exploração sexual infantil', 'url__1': 'https://agenciabrasil.ebc.com.br/direitos-humanos/noticia/2026-02/influenciador-hytalo-santos-e-condenado-por-exploracao-sexual-infantil', 'search_id__2': 42, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2205 characters truncated) ... CKkyPV4bq4jt1tvCBOu9iOAo5P6Zq6kEpXcTCzoPD+GA379Kd7BExhX+zbnmld5cOtzbw+EhmPjI8Q4J4P0oCKzWzDLwJGRxuDZGfcHg0puSO/cjOCc89alqBHxCOqKrN/dtHWgvyxz60FX//2Q==', 'state__2': 'PA', 'source__2': 'Portal da Câmara dos Deputados', 'city__2': 'Para', 'published_date__2': '10 de set. de 2025', 'title__2': 'Comissão aprova projeto que aumenta penas para crimes sexuais contra vulneráveis', 'url__2': 'https://www.camara.leg.br/noticias/1198880-COMISSAO-APROVA-PROJETO-QUE-AUMENTA-PENAS-PARA-CRIMES-SEXUAIS-CONTRA-VULNERAVEIS', 'search_id__3': 42, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2841 characters truncated) ... Kzoxtsq+BIdNSqieUSHGa2tgiDApGsznBJ3pnG57sHrSCo9re7uBGhOak9V1VeFhxdaZ6vKwgbfpXOb6WRpXBc4zRY2bFCkfqERdagZHIUk70P3kp3zj0oOA4fh503jiBQHJ39qa1DUiZHOX/2Q==', 'state__3': 'PA', 'source__3': 'Folha BV', 'city__3': 'Para', 'published_date__3': '2 semanas atrás', 'title__3': 'Projeto propõe aumento de pena para exploração sexual infantil em áreas de fronteira', 'url__3': 'https://www.folhabv.com.br/politica/projeto-propoe-aumento-de-pena-para-exploracao-sexual-infantil-em-areas-de-fronteira/', 'search_id__4': 42, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3077 characters truncated) ... cHB56kEn+I1DrpOplcGzcEHjxL/Or6SyigAdTI75/XK5dh9TWGTuIyT86or+oWUrtUcfuIs0aO2SZFrpGscgaapHqXT/2ouLRb3uwZbZFbzG5ePzVO656MR8qHMrgkbj96nbUljnAhDTgDGTP/9k=', 'state__4': None, 'source__4': 'Senado Federal', 'city__4': None, 'published_date__4': '8 de out. de 2025', 'title__4': 'Exploração sexual de criança, adolescente e vulnerável poderá ter pena aumentada', 'url__4': 'https://www12.senado.leg.br/radio/1/noticia/2025/10/08/exploracao-sexual-de-crianca-adolescente-e-vulneravel-podera-ter-pena-aumentada', 'search_id__5': 42, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2257 characters truncated) ... tc6VPJGbXTXwCMSTA8n0X+6FotPh4yXPxqY2yIMKWoPtLdYf3XmIS7uY1iCQghEHG7vdj4n+vAUgTbZlPEqc1GbZHmUMzYB86uvAu0ctTULM/TZcgo3gatuBu4qK1tUW5bDN/FWnhXd95q4w//9k=', 'state__5': 'SP', 'source__5': 'Estadão' ... 197 parameters truncated ... 'source__27': 'g1 - O portal de notícias da Globo', 'city__27': None, 'published_date__27': '25 de set. de 2025', 'title__27': 'Homem é condenado a 58 anos de prisão por estupro e exploração sexual de criança e adolescente no Piauí', 'url__27': 'https://g1.globo.com/pi/piaui/noticia/2025/09/25/homem-e-condenado-a-58-anos-de-prisao-por-estupro-e-exploracao-sexual-de-crianca-e-adolescente-no-piaui.ghtml', 'search_id__28': 42, 'snippet__28': '', 'image_url__28': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2541 characters truncated) ... ksXZW+Hw5tTDyAyuhlxk4UBtusJAz5VYU4oJJz0oJcVFbjAJO6+Y9DWhsur9KuG4ym1AEBSlDpyx9Kw/GH6V8cI37RCVE8t8Y/FaOBKdLrjalBWg4CiNz60G4mZQu4JKh/TH3NZRy+MU/9dPjuf/Z', 'state__28': 'PA', 'source__28': 'Estadão', 'city__28': 'Para', 'published_date__28': '3 de jul. de 2025', 'title__28': '9 vezes em que celebridades foram parar no tribunal', 'url__28': 'https://www.estadao.com.br/emais/gente/9-vezes-que-celebridades-foram-parar-no-tribunal-nprec/', 'search_id__29': 42, 'snippet__29': '', 'image_url__29': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2873 characters truncated) ... tI0RbqIz3BdUPyBfP1qvqGlxS6cYLeMIyepAOOab0/iwtwBj8tf2os2RExBwcd6qtCbOCVcNgggg4qhGfSKRmGLmQZJwx5PnmmYzxUlMIzc0VGyKWY+qsxuVnwPagBrJI4rw5Gc0MMSTWQxoA/9k=', 'state__29': None, 'source__29': 'g1 - O portal de notícias da Globo', 'city__29': None, 'published_date__29': '12 de jun. de 2025', 'title__29': 'Justiça de Fartura condena cinco pessoas a mais de 213 anos por exploração sexual de adolescentes', 'url__29': 'https://g1.globo.com/sp/itapetininga-regiao/noticia/2025/06/12/justica-de-fartura-condena-cinco-pessoas-a-mais-de-213-anos-por-exploracao-sexual-de-adolescentes.ghtml', 'search_id__30': 42, 'snippet__30': '', 'image_url__30': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3369 characters truncated) ... W19AsK7VaAKVHTA6UxXNvFLogaRdzIylSfLpU1dno+CU52Ks161stwIyM8ADHU0pXVzJHOyIGyD4/+3nT5MiW+kalqKIpuIY/yywyFJ4z96qeyWiWeoaV+IuQ7SNIckN7A/vSQsLIX5fkdXj+H//Z', 'state__30': None, 'source__30': 'CNN Brasil', 'city__30': None, 'published_date__30': '28 de mai. de 2025', 'title__30': 'Ex-cirurgião da França é condenado a 20 anos de prisão por abuso infantil', 'url__30': 'https://www.cnnbrasil.com.br/internacional/ex-cirurgiao-da-franca-e-condenado-a-20-anos-de-prisao-por-abuso-infantil/', 'search_id__31': 42, 'snippet__31': '', 'image_url__31': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3373 characters truncated) ... BFHRoQNahFA7bb/rhb/05oIGljqWBMju179AtrD539hhk0g1PCxJ8uwHT7t8Kkl0jap12y28QFO5F7ld8dq1qZCBbyjbEibrY4rwkmmF97E4YUjpmssx2J1nEjIrm5GOKdQZp1ttYH3xLYDCgf//Z', 'state__31': 'SP', 'source__31': '18 Horas', 'city__31': 'Santos', 'published_date__31': '1 semana atrás', 'title__31': 'Hytalo Santos e Euro são condenados por exploração sexual de adolescentes', 'url__31': 'https://18horas.com.br/brasil/hytalo-santos-e-euro-sao-condenados-por-exploracao-sexual-de-adolescentes/', 'search_id__32': 42, 'snippet__32': '', 'image_url__32': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (1557 characters truncated) ... 0b5/85nmhHosOkiC/mfTq3KD2JGR8Y1qXBwVxPHRa9FgsrOGH1z6HStXq6VtBTr3DE9D5TSaT6ZVLXDjbpr2114YArSg5aq/vR/3PFEhMTYWEIQAIQhAAhCEACLEhAAkiXWIMIxUZz0MjhAD/2Q==', 'state__32': None, 'source__32': 'GZH', 'city__32': None, 'published_date__32': '29 de ago. de 2025', 'title__32': 'Homem é condenado a 456 anos de prisão por estupro da filha de 10 anos com transmissões online', 'url__32': 'https://gauchazh.clicrbs.com.br/seguranca/noticia/2025/08/homem-e-condenado-a-456-anos-de-prisao-por-estupro-da-filha-de-10-anos-com-transmissoes-online-cmexc4c0u01fb01e97pkarse7.html'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 43
+Committing batch of 33 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://www.pjc.mt.gov.br/w/pol%C3%ADcia-civil-prende-homem-por-abuso-sexual-infantil-em-barra-do-gar%C3%A7as) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 5131 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 43, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3429 characters truncated) ... fV3Ldz78Rp7iS466H/hOGXJjAPhvfz3xH2eI3soGxFx7sUSkcobgKfQC2LqkoY6XwgDkef+o+BKmIQvpQt174lMx5NN+yP8b4QTp4k9ojK3B1j88Qlp7yudf2j29ceU7nnR/rD88eu55j/rHAH//Z', 'state__0': None, 'source__0': 'PJC - POLÍCIA JUDICIÁRIA CIVIL DO ESTADO DE MATO GROSSO', 'city__0': None, 'published_date__0': '3 semanas atrás', 'title__0': 'Polícia Civil prende homem por abuso sexual infantil em Barra do Garças', 'url__0': 'https://www.pjc.mt.gov.br/w/pol%C3%ADcia-civil-prende-homem-por-abuso-sexual-infantil-em-barra-do-gar%C3%A7as', 'search_id__1': 43, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3429 characters truncated) ... fV3Ldz78Rp7iS466H/hOGXJjAPhvfz3xH2eI3soGxFx7sUSkcobgKfQC2LqkoY6XwgDkef+o+BKmIQvpQt174lMx5NN+yP8b4QTp4k9ojK3B1j88Qlp7yudf2j29ceU7nnR/rD88eu55j/rHAH//Z', 'state__1': None, 'source__1': 'PJC - POLÍCIA JUDICIÁRIA CIVIL DO ESTADO DE MATO GROSSO', 'city__1': None, 'published_date__1': 'há 3 horas', 'title__1': 'Polícia Civil prende homem por abuso sexual infantil em Barra do Garças', 'url__1': 'https://www.pjc.mt.gov.br/w/pol%C3%ADcia-civil-prende-homem-por-abuso-sexual-infantil-em-barra-do-gar%C3%A7as', 'search_id__2': 43, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3113 characters truncated) ... boF6KPICi7ieS7vZHnbcQSB5AA0dZoOOKoe6XHbC9Js47K3WNM+ZJOc1T6BbLdtOMZKqCKRxju1Y/A0am2upSO8WC/YChZTS8S+MW0V6jpBjywH4pG8ToxBrpWowoYySKm5raIyHu0JMhhWSf/9k=', 'state__2': 'AL', 'source__2': 'g1 - O portal de notícias da Globo', 'city__2': 'Alagoas', 'published_date__2': '3 dias atrás', 'title__2': 'Criança de 11 anos filma abuso e dono de mercadinho é preso em Alagoas', 'url__2': 'https://g1.globo.com/al/alagoas/noticia/2026/02/26/crianca-de-11-anos-filma-abuso-e-dono-de-mercadinho-e-preso-em-maceio.ghtml', 'search_id__3': 43, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2773 characters truncated) ... D/SMdIPZynMFXNxWk4l9mGBIbu09PbAGwdSfqk1SMb4Wg4atfQPSVWB76kn6JrSOSD2ZShJDGTLMnDITKo6ULjjow4kd5FjofPWopA7A9Klo0yQiEqD0hMZSwstnbMBvUa4AlZA2o68RZS3s//9k=', 'state__3': None, 'source__3': 'GOV.BR', 'city__3': None, 'published_date__3': '25 de nov. de 2025', 'title__3': 'PF faz prisão em operação contra abuso sexual infantojuvenil — Polícia Federal', 'url__3': 'https://www.gov.br/pf/pt-br/assuntos/noticias/2025/11/pf-faz-prisao-em-operacao-contra-abuso-sexual-infantojuvenil', 'search_id__4': 43, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3269 characters truncated) ... 1zTF06+a374SsFVpOMAMfIfpinqwdhZxpk7VUYHpxSRqrF9Rumbk98/7mnR+5nP8AxQKMJ8wR+tVzCnjJc7hjaMdeueaJYyKgubVEsYLkFt8s0qMCeMKFI/8Ao00EHspWvN1dsMsBXvdr6VCH/9k=', 'state__4': None, 'source__4': 'CNN Brasil', 'city__4': None, 'published_date__4': '8 de out. de 2025', 'title__4': 'PF faz megaoperação contra abuso sexual de crianças e adolescentes', 'url__4': 'https://www.cnnbrasil.com.br/nacional/brasil/pf-faz-megaoperacao-contra-abuso-sexual-de-criancas-e-adolescentes/', 'search_id__5': 43, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2497 characters truncated) ... aYwwhSGpCh1kPgKtDHNARDDCXDarV3FUqasWhIlqmTXOeeKvULj396HztU1NDa8MNaFRKCMhsnrRkZVgBvnlvSxGOat75l5YofWTCFUCMtlGAfvrzhpW99KvJU+YNDfytcfZj9D+dGKcBq4n/2Q==', 'state__5': 'MG', 'source__5': 'Universal.org' ... 197 parameters truncated ... 'source__27': 'g1 - O portal de notícias da Globo', 'city__27': None, 'published_date__27': '2 de dez. de 2025', 'title__27': 'Jovem é preso suspeito de armazenar e compartilhar material de exploração sexual infantil em Itatinga', 'url__27': 'https://g1.globo.com/sp/bauru-marilia/noticia/2025/12/02/jovem-e-preso-suspeito-de-armazenar-e-compartilhar-material-de-exploracao-sexual-infantil-em-itatinga.ghtml', 'search_id__28': 43, 'snippet__28': '', 'image_url__28': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3069 characters truncated) ... zJQtK/laGhSSCCCTgimFtDA7yvjSOEPnK+NAdcdmu4Du07ehyN1s6UyN5LoeO1LocTyUhDmRQjhDqr417gjPrKoJ5jwckqv7xUTlSjHWcnrrTKIMBSd5d0VvHnmKo012dO6TvK0rgaHVXxoP/2Q==', 'state__28': None, 'source__28': 'g1 - O portal de notícias da Globo', 'city__28': None, 'published_date__28': '15 de out. de 2025', 'title__28': 'Idoso é preso por abuso sexual de 7 crianças e adolescentes em período de 22 anos em MG', 'url__28': 'https://g1.globo.com/mg/triangulo-mineiro/noticia/2025/10/15/idoso-e-preso-por-abuso-sexual-de-7-criancas-e-adolescentes-em-periodo-de-22-anos-em-mg.ghtml', 'search_id__29': 43, 'snippet__29': '', 'image_url__29': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3381 characters truncated) ... CMXWMBiMcVzcQQ3MYS4iSVAwYK4yARyD8iBWiOxJBPhXLxjMWtohPFIRjs3V8/gan+o75LO5gXdkuhZvrVNGTIQW9eKiuvVH2+1/3R/nVaRIa4nJpb3yTjg81uBmpqxJSQbSapIidgrfTct3Cf//Z', 'state__29': None, 'source__29': 'CNN Brasil', 'city__29': None, 'published_date__29': '23 de out. de 2025', 'title__29': 'Capitão Hunter: o que sabemos sobre prisão de youtuber do universo Pokémon', 'url__29': 'https://www.cnnbrasil.com.br/nacional/sudeste/sp/capitao-hunter-o-que-sabemos-sobre-prisao-de-youtuber-do-universo-pokemon/', 'search_id__30': 43, 'snippet__30': '', 'image_url__30': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (4129 characters truncated) ... ipItjrJuLdje4/tibUtnJjWqUUTSoBIy61Gx9Wk2xhE4I3FuAMZqJGZEJPcW7D9HEDyusgVTYGx+2Komw9JpVUqTbpcc4S1OTpW1EktVX1zNew0TCwHbfjrgxnYBQDz/1fApkZrarNt1F8d0FH//Z', 'state__30': None, 'source__30': 'ba.gov.br', 'city__30': None, 'published_date__30': '17 de out. de 2025', 'title__30': 'Comerciante investigado por abuso sexual de uma criança é preso em Belmonte', 'url__30': 'http://www.ba.gov.br/policiacivil/noticias/2025-10/22862/comerciante-investigado-por-abuso-sexual-de-uma-crianca-e-preso-em-belmonte', 'search_id__31': 43, 'snippet__31': '', 'image_url__31': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3033 characters truncated) ... x/wANtxOMV88a46CrbACRL1ZBvWO1kKhu48hn4bj9KaSQNtu2ZoVbaMHAp84G9M/LJf8AeZY4u2OwLjwGeo8fvSRC2cDAp+0tzZcOq1uArCAyZPP1iM5pnLEUuXmlZjklySa+JqlGJJ99SLGkB//Z', 'state__31': None, 'source__31': 'g1 - O portal de notícias da Globo', 'city__31': None, 'published_date__31': '14 de ago. de 2025', 'title__31': 'Abuso sexual infantil: jovem é preso em Itabira, e vítimas são crianças da família do suspeito', 'url__31': 'https://g1.globo.com/mg/minas-gerais/noticia/2025/08/14/abuso-e-pornografia-infantil-jovem-e-preso-em-itabira-e-vitimas-sao-criancas-da-familia-do-suspeito.ghtml', 'search_id__32': 43, 'snippet__32': '', 'image_url__32': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2889 characters truncated) ... 09vGjYC18SFCelLsUkCaczi8iUEgM2D7UysTiaW3J4HKj680RaWsW8Pg5XkVmkaDVsquCynOK142ZXph1s3gljkyUC7x59P7mnunacvwqtLEAzc4I6D0pBDI0UgkTG5HXFXGz0Yip/oekVwo//9k=', 'state__32': None, 'source__32': 'g1 - O portal de notícias da Globo', 'city__32': None, 'published_date__32': '5 de ago. de 2025', 'title__32': 'Ex-vereador de Colina, SP, condenado por abuso sexual de menores tem pena aumentada', 'url__32': 'https://g1.globo.com/sp/ribeirao-preto-franca/noticia/2025/08/05/ex-vereador-de-colina-sp-condenado-por-abuso-sexual-de-menores-tem-pena-aumentada.ghtml'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 44
+Committing batch of 33 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://oimparcial.com.br/noticias/2026/03/adolescentes-sao-apreendidas-por-suspeita-de-estupro-de-vulneravel-em-vila-nova-dos-martirios/) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 5131 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 44, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2389 characters truncated) ... fIHJ+lNZxlQ2SCepFIQMWU94wPTI4/lT6sMkyspON2WX03MM/DFL2Rsc4I+NRKKXxueQ/xkV3jhQHK5GR65/nU9cBkdurr+By3ngN5+40n7VdJwRcZ9hyPrTZxg7cmuLPIMYkbp7D/OngMn//2Q==', 'state__0': None, 'source__0': 'O Imparcial', 'city__0': None, 'published_date__0': '10 de dez. de 2025', 'title__0': 'Adolescentes são apreendidas por suspeita de estupro de vulnerável em Vila Nova dos Martírios', 'url__0': 'https://oimparcial.com.br/noticias/2026/03/adolescentes-sao-apreendidas-por-suspeita-de-estupro-de-vulneravel-em-vila-nova-dos-martirios/', 'search_id__1': 44, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2389 characters truncated) ... fIHJ+lNZxlQ2SCepFIQMWU94wPTI4/lT6sMkyspON2WX03MM/DFL2Rsc4I+NRKKXxueQ/xkV3jhQHK5GR65/nU9cBkdurr+By3ngN5+40n7VdJwRcZ9hyPrTZxg7cmuLPIMYkbp7D/OngMn//2Q==', 'state__1': None, 'source__1': 'O Imparcial', 'city__1': None, 'published_date__1': 'há 2 horas', 'title__1': 'Adolescentes são apreendidas por suspeita de estupro de vulnerável em Vila Nova dos Martírios', 'url__1': 'https://oimparcial.com.br/noticias/2026/03/adolescentes-sao-apreendidas-por-suspeita-de-estupro-de-vulneravel-em-vila-nova-dos-martirios/', 'search_id__2': 44, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2617 characters truncated) ... ntxKoYB2GD6YFJfjIKqPmkZro2pLpl34rL4kTqVZRjI571sfRs6XWiLcRBgkjlgGGCOAPyrPYdPtIp5FjhVcDOcc1oHRZJ0ViT/nMPkKZGSlPoqcXGvsfbCUGJV91WiKF6eTtFFEORWy9go//2Q==', 'state__2': None, 'source__2': 'G1', 'city__2': None, 'published_date__2': '3 dias atrás', 'title__2': 'Suspeitos de aliciar adolescentes são presos em operação contra exploração sexual no interior de SP', 'url__2': 'https://g1.globo.com/sp/bauru-marilia/noticia/2026/02/26/suspeitos-de-aliciar-adolescentes-sao-presos-em-operacao-contra-exploracao-sexual-no-interior-de-sp.ghtml', 'search_id__3': 44, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3013 characters truncated) ... YtYkiLD8SAZb4muX1VgmWcfOs91rV7q2mWKHYqg4HFP8A2JtY59Ajv5vHcvvPeMAcYJAAGMCsKpNVbKrpf3e+WCFwn8bDA+nnQ2WzjBDMS5YZ3Fqa7jUbg2qyZXcR6UtoO9UO/VuaTknxQvI+J//Z', 'state__3': None, 'source__3': 'Portal de Beltrão', 'city__3': None, 'published_date__3': '2 dias atrás', 'title__3': 'Foragido condenado a 51 anos por estupro de vulnerável é preso', 'url__3': 'https://www.portaldebeltrao.com.br/noticias/27559/foragido-condenado-a-51-anos-por-estupro-de-vulneravel-e-preso', 'search_id__4': 44, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2909 characters truncated) ... uUbK/2v3qCAADpU24lgvQfKt0eNIMkJeC+WVVQw7Yht9JHB5/KoLnTINTl883QBHpK7QAuO2MihPhi9nEZtt+YjkbT2z8D2oT4m8W6xp+szWlnPHHDGECjylY8qDyTk96G8ORfGWV5T9yv4f/2Q==', 'state__4': None, 'source__4': 'Polícia Civil do Estado de São Paulo', 'city__4': None, 'published_date__4': '11 de nov. de 2025', 'title__4': "'Operação Hera II' prende suspeito de estupro de vulnerável em Taboão da Serra", 'url__4': 'https://www.policiacivil.sp.gov.br/portal/faces/pages_home/noticias/noticiasDetalhes?rascunhoNoticia=0&collectionId=358412565221066808&contentId=UCM_071033', 'search_id__5': 44, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3921 characters truncated) ... SW4jv4/bVFWIwcjPqNaa+HTQxk9NVzU0wmp5HhkB/XjYqfcaZbd+IvaW3kBa/4qMf9urQP/m2b76UxrGpA6zb/wAX42QJdbSQcbyUkgIP7rY/+tGovxA7MzJxm4GMn8skDgj2B1ww7a1ydNKgP//Z', 'state__5': None, 'source__5': 'Agência SP' ... 197 parameters truncated ... 'source__27': 'Diário do Nordeste', 'city__27': None, 'published_date__27': '20 de nov. de 2025', 'title__27': 'Suspeito de abuso sexual contra crianças é morto em ação policial no Ceará', 'url__27': 'https://diariodonordeste.verdesmares.com.br/seguranca/suspeito-de-abuso-sexual-contra-criancas-e-morto-em-acao-policial-no-ceara-1.3711636', 'search_id__28': 44, 'snippet__28': '', 'image_url__28': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3337 characters truncated) ... ohWM3s1jj3hDc8rYnsLj3x3pF+XLACLnpg5V45JI2U7NGbHHvAkIAaaVxe4DNfBq24hFrY+YebbvjjgP7OeuoY+Wm32c4N0i43O+PAN7fXA0g7BlpzbyyG/tiQREcy30xK+xAHzx8rG3PHaAf/9k=', 'state__28': None, 'source__28': 'polícia civil do acre', 'city__28': None, 'published_date__28': '28 de mai. de 2025', 'title__28': 'Operação da Polícia Civil em Xapuri prende dois homens por estupro de vulnerável e tráfico de drogas', 'url__28': 'https://pc.ac.gov.br/operacao-da-policia-civil-em-xapuri-prende-dois-homens-por-estupro-de-vulneravel-e-trafico-de-drogas/', 'search_id__29': 44, 'snippet__29': '', 'image_url__29': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3285 characters truncated) ... NpLtHo0O09S//ALGq/K7efMTzmRs5780ZWtgfRsN94I8Na5EJ7WMWzsOJbNwFPzXp+gqr3P8AS3U1lIs9UtXh/KZVZW+wBH61WtO1jUNInRrG5dA3VScitY0LWbm/sBNcLEXDFchcZ6e9P0Lp/9k=', 'state__29': None, 'source__29': 'SSP-AM', 'city__29': None, 'published_date__29': '26 de mar. de 2025', 'title__29': 'Operação Ponto Final: PC-AM cumpre mandado contra homem investigado por estupro e organização criminosa em Urucará', 'url__29': 'https://www.ssp.am.gov.br/operacao-ponto-final-pc-am-cumpre-mandado-contra-homem-investigado-por-estupro-e-organizacao-criminosa-em-urucara/', 'search_id__30': 44, 'snippet__30': '', 'image_url__30': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2265 characters truncated) ... WI7QTgGrp0h4bbzPHI2oFgSwU4BqncQmFhMVtoYlYHAdl1EfWt2N3GzJNtOjaEFxm0tWcfqC7D1bast1qkhrm2iP6WlJI+gpVc39zcECWViB2DYfQVaeB2Ftf8Nimu4hJIMrqyRsOXKnboSmz/9k=', 'state__30': None, 'source__30': 'PCES', 'city__30': None, 'published_date__30': '1 de abr. de 2024', 'title__30': 'PCES - Polícia Civil prende suspeito de estupro de vulnerável em operação na Serra', 'url__30': 'https://pc.es.gov.br/Not%C3%ADcia/policia-civil-prende-suspeito-de-estupro-de-vulneravel-em-operacao-na-serra', 'search_id__31': 44, 'snippet__31': '', 'image_url__31': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3577 characters truncated) ... dwzwSzMIpYwCqoMrsOhz5kVHBJeIN/wCVdPhAWW7uy2+4CjO+PL0p4I4L1iarLDlk0AOiY0wZ2DGgQ5WNADwxpgPBNAhpY4pgIGOaAwdATTEPbdos91XP1P8AQUu4dhsMSSoC65IAA+gP70xH/9k=', 'state__31': None, 'source__31': 'Secretaria da Segurança Pública e Defesa Social', 'city__31': None, 'published_date__31': '7 de mar. de 2025', 'title__31': 'Forças de Segurança do Ceará deflagram operação de combate à violência contra a mulher e cumprem treze mandados de prisão', 'url__31': 'https://www.sspds.ce.gov.br/2025/03/07/fforcas-de-seguranca-do-ceara-deflagram-operacao-de-combate-a-violencia-contra-a-mulher-e-cumprem-treze-mandados-de-prisao/', 'search_id__32': 44, 'snippet__32': '', 'image_url__32': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3645 characters truncated) ... hqK0cUwP2jozMx3uQSO+C7fo5pMJRUCIUWGMoioHjbfSB2sPgeN99r4kiy3OKUMsE8DKx1EzxBje3a7Db9b46rT0cniro9pUbQACQLar/AB7kfPBKkp1qWqNbyDpSmMFWtcAA3Pqd8dT5B7fg/9k=', 'state__32': None, 'source__32': 'polícia civil do acre', 'city__32': None, 'published_date__32': '2 de out. de 2025', 'title__32': 'Suspeito de estupro de vulnerável é preso pela Polícia Civil em Tarauacá após denúncia anônima', 'url__32': 'https://pc.ac.gov.br/suspeito-de-estupro-de-vulneravel-e-preso-pela-policia-civil-em-tarauaca-apos-denuncia-anonima/'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 45
+Committing batch of 27 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://www.cnnbrasil.com.br/nacional/sudeste/sp/pedofilia-e-exploracao-sexual-entenda-operacao-que-prendeu-piloto-da-latam/) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 4183 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 45, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2701 characters truncated) ... i4PbBGP1rreYNBVvJoodd0+O3WaWLavLBI3dunhXXQb6K8topIlZB2IbzoDjSaRhcqWJXmHp9K48Jkizjx/nb71F47TrK3L82IuIzla8SL61foCdtenqHplncQ6zbCiit1A2p6fKis1UQSXJ//9k=', 'state__0': None, 'source__0': 'CNN Brasil', 'city__0': None, 'published_date__0': '28 de mar. de 2025', 'title__0': 'Pedofilia e exploração sexual: entenda operação que prendeu piloto da Latam', 'url__0': 'https://www.cnnbrasil.com.br/nacional/sudeste/sp/pedofilia-e-exploracao-sexual-entenda-operacao-que-prendeu-piloto-da-latam/', 'search_id__1': 45, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2701 characters truncated) ... i4PbBGP1rreYNBVvJoodd0+O3WaWLavLBI3dunhXXQb6K8topIlZB2IbzoDjSaRhcqWJXmHp9K48Jkizjx/nb71F47TrK3L82IuIzla8SL61foCdtenqHplncQ6zbCiit1A2p6fKis1UQSXJ//9k=', 'state__1': None, 'source__1': 'CNN Brasil', 'city__1': None, 'published_date__1': '3 semanas atrás', 'title__1': 'Pedofilia e exploração sexual: entenda operação que prendeu piloto da Latam', 'url__1': 'https://www.cnnbrasil.com.br/nacional/sudeste/sp/pedofilia-e-exploracao-sexual-entenda-operacao-que-prendeu-piloto-da-latam/', 'search_id__2': 45, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3505 characters truncated) ... 8Z/Xt1pFfQjW2TZHXZFn2YSw5c9Q8oR2kvEygK1wdyB1Y2Hj6bV4+IeF1aQQV9QAHs2mBiCwsCd08sCPyf1z5fkM9RBHGZp6htbsCTsBYc+XP5nCtm2mmzGdIVCqzl7eBbc/DfFldOmmTrHGj/9k=', 'state__2': None, 'source__2': 'R7', 'city__2': None, 'published_date__2': '1 de dez. de 2025', 'title__2': 'Polícia desarticula rede de pedofilia em grande operação', 'url__2': 'https://record.r7.com/balanco-geral-manha/video/policia-desarticula-rede-de-pedofilia-em-grande-operacao-01122025/', 'search_id__3': 45, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2949 characters truncated) ... op0Gn0hU0/Jza3HcMO7VsZ55o614jLEWwCSFPupczuG7oSM8USsn76Ab1UmPGDjmjAND+zRo4dQuUgfu2MJCgnryCflxT3ItwzZN1N+BwKx3shcSfviFwcEyhePQ9frWqw3Uqpjdn40jL2Mh0f//Z', 'state__3': None, 'source__3': 'Governo Federal', 'city__3': None, 'published_date__3': '5 de nov. de 2025', 'title__3': 'PF prende suspeito e desarticula rede de abuso infantojuvenil no Maranhão', 'url__3': 'https://www.gov.br/pf/pt-br/assuntos/noticias/2025/11/pf-prende-suspeito-e-desarticula-rede-de-abuso-infantojuvenil-no-maranhao', 'search_id__4': 45, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3281 characters truncated) ... pGFEdiSpB+lbuxaqRrUpuAbIDv78SS0sJSNim5F+OCMxOKWihZd8N0WX0tHDlAlanWNWc1CoNSqAR93dzwfT13SOGPSMlpbFiw11tjufqYtUtDBEJSFJ3Y7nw/bDNPHGytqQGxFtzyGNN2zPB/9k=', 'state__4': None, 'source__4': 'PJC - POLÍCIA JUDICIÁRIA CIVIL DO ESTADO DE MATO GROSSO', 'city__4': None, 'published_date__4': '18 de nov. de 2025', 'title__4': 'Polícia Civil desarticula grupo criminoso do RS envolvido em crimes de sextorsão contra vítimas de MT', 'url__4': 'https://www.pjc.mt.gov.br/w/pol%C3%ADcia-civil-vai-a-rs-e-desarticula-grupo-criminoso-envolvido-em-crimes-de-sextors%C3%A3o-contra-v%C3%ADtimas-de-mt', 'search_id__5': 45, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3265 characters truncated) ... T+OPzox2uqtJdAPs1Br9I85Ag7I5Yp3WobtwXGIs54+994Z8s80Eex8M31kaaq6kkbo40IyCQeh8wa1Brupkgm6J24wO7XAAxx06e6OPSh/pO/wCQLuUDcx4OOSSx/MmhLa6r9wY9m6cfYucj/9k=', 'state__5': None, 'source__5': 'Band' ... 143 parameters truncated ... 'source__21': 'Gazeta do Povo', 'city__21': None, 'published_date__21': '19 de nov. de 2013', 'title__21': 'PF prende 25 acusados de pedofilia', 'url__21': 'https://www.gazetadopovo.com.br/vida-e-cidadania/pf-prende-25-acusados-de-pedofilia-3jqfq9lsz6ejujc4wnyy6izpq/', 'search_id__22': 45, 'snippet__22': '', 'image_url__22': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2201 characters truncated) ... amiPKDznIHX1NLYaQ1gA9OaafPb82KkOo9O32rhVHHbIBxQBoiOhCscnB6Unw8jke9SCN3J7cUyVAkx7nBoTRVjGO4zTyg5IzknnFIBhse4FOqOvzrocIvTyk/WlPHvSsuIgc05GCQfMRzWnH/9k=', 'state__22': 'PA', 'source__22': 'g1 - O portal de notícias da Globo', 'city__22': 'Para', 'published_date__22': '29 de jun. de 2012', 'title__22': 'Mulher é condenada a sete anos após vender foto da filha para rede pedófila', 'url__22': 'https://g1.globo.com/sp/piracicaba-regiao/noticia/2015/05/mulher-e-condenada-sete-anos-apos-vender-foto-da-filha-para-rede-pedofila-limeira.html', 'search_id__23': 45, 'snippet__23': '', 'image_url__23': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2201 characters truncated) ... amiPKDznIHX1NLYaQ1gA9OaafPb82KkOo9O32rhVHHbIBxQBoiOhCscnB6Unw8jke9SCN3J7cUyVAkx7nBoTRVjGO4zTyg5IzknnFIBhse4FOqOvzrocIvTyk/WlPHvSsuIgc05GCQfMRzWnH/9k=', 'state__23': 'PA', 'source__23': 'g1 - O portal de notícias da Globo', 'city__23': 'Para', 'published_date__23': '11 de mai. de 2015', 'title__23': 'Mulher é condenada a sete anos após vender foto da filha para rede pedófila', 'url__23': 'https://g1.globo.com/sp/piracicaba-regiao/noticia/2015/05/mulher-e-condenada-sete-anos-apos-vender-foto-da-filha-para-rede-pedofila-limeira.html', 'search_id__24': 45, 'snippet__24': '', 'image_url__24': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3657 characters truncated) ... HuSghlPLl0wN9JQC8WKRt/Jx38+84+mAW1g5+z4jqWK4eh5i79knShnrkhZ6am0iRxyBYgD4nGWGUzJ2km7Mbk4q3DGX01VwY1LUR64qlZe0B6m5APssPdiQRMVDAHkxxWvIL2MvicPQFRW8z/9k=', 'state__24': 'PA', 'source__24': 'Revista Fórum', 'city__24': 'Para', 'published_date__24': '26 de mai. de 2023', 'title__24': 'Presa mãe que receberia “salário” para ceder filha de menos de 2 anos para estupros', 'url__24': 'https://revistaforum.com.br/brasil/presa-mae-que-receberia-salario-para-ceder-filha-de-menos-de-2-anos-para-estupros/', 'search_id__25': 45, 'snippet__25': '', 'image_url__25': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2589 characters truncated) ... xf3BPxD8op4vX/wAQ9KmR3yQVv4gh61dSi6xdbiwRDjoUggkyFeR9aHLzR+DyqNGI3SDCHCnu0pjji3VZ3FFSlakmrQrqVic0SN/GnvHzreFD7Xxp8Q+dEQFYNfWEY+Xu3iWyIUq6BXYoc0MqZ//Z', 'state__25': 'PA', 'source__25': 'G1', 'city__25': 'Para', 'published_date__25': '25 de fev. de 2025', 'title__25': 'Golpe dos nudes: grupo se passava por chefe da Polícia Civil do RS para extorquir pessoas', 'url__25': 'https://g1.globo.com/rs/rio-grande-do-sul/noticia/2025/02/25/golpe-dos-nudes-grupo-se-passava-por-chefe-da-policia-civil-do-rs-para-extorquir-pessoas.ghtml', 'search_id__26': 45, 'snippet__26': '', 'image_url__26': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAMAAADUMSJqAAAAilBMVEUAL9f///8ALdcAANMAK9cAKNYAGNUAINYAI9YAFdUAHNUAJtb///0AEdUACtTv8fv29/zV2PT ... (2192 characters truncated) ... 9s+kFtpnZEMWqJXhfcr8oaD+ZGKXnR221WsZBlNxwlbTnxkMK8y3b+2iuIFFyo9ft/ktTTlmxXcRfkxZ5dYjj+L5WJDN0xp66yvJvqur6ex9v/uzP/uzP/qv2Py1tZZYoUr1eAAAAAElFTkSuQmCC', 'state__26': 'PA', 'source__26': 'Estadão', 'city__26': 'Para', 'published_date__26': '29 de jun. de 2012', 'title__26': 'Humorista Mução é transferido para presídio em Recife', 'url__26': 'https://www.estadao.com.br/brasil/humorista-mucao-e-transferido-para-presidio-em-recife/'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 46
+Committing batch of 33 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://www.camara.leg.br/noticias/1188055-comissao-aprova-aumento-de-pena-para-o-aliciamento-de-criancas-e-adolescentes-por-meio-da-internet/) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 5131 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 46, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3305 characters truncated) ... 6VLrC2J+VQEqU/LOJISScY0k6s8OXOKGpSZFBl2yy4FCdUcFJyPI4xoWtRUTnccxGdalZPlGNdw34MvCjUWX1yLuWFpUU/FIgfcMu+qszKg0og6d8fJES1q7T4xwuLGPKPjGnnb8EsfTxje5//9k=', 'state__0': 'PA', 'source__0': 'Portal da Câmara dos Deputados', 'city__0': 'Para', 'published_date__0': '28 de set. de 2025', 'title__0': 'Comissão aprova aumento de pena para o aliciamento de crianças e adolescentes por meio da internet', 'url__0': 'https://www.camara.leg.br/noticias/1188055-comissao-aprova-aumento-de-pena-para-o-aliciamento-de-criancas-e-adolescentes-por-meio-da-internet/', 'search_id__1': 46, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3305 characters truncated) ... 6VLrC2J+VQEqU/LOJISScY0k6s8OXOKGpSZFBl2yy4FCdUcFJyPI4xoWtRUTnccxGdalZPlGNdw34MvCjUWX1yLuWFpUU/FIgfcMu+qszKg0og6d8fJES1q7T4xwuLGPKPjGnnb8EsfTxje5//9k=', 'state__1': 'PA', 'source__1': 'Portal da Câmara dos Deputados', 'city__1': 'Para', 'published_date__1': '13 de ago. de 2025', 'title__1': 'Comissão aprova aumento de pena para o aliciamento de crianças e adolescentes por meio da internet', 'url__1': 'https://www.camara.leg.br/noticias/1188055-comissao-aprova-aumento-de-pena-para-o-aliciamento-de-criancas-e-adolescentes-por-meio-da-internet/', 'search_id__2': 46, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (4169 characters truncated) ... lkuiTR1UjcqQ845dt8jUPyuWuHcr+OodTyiDUcJXq2w1dXPDRMFjznvSQAOuxG+tc4Cv9og4Ls0VVdaKKZKRFeOSoRWUjyIztqCpAKOCMjcb6MUNHSfBQf0WA+AdYxqb4XyTkYq3qHm+MoAqf/9k=', 'state__2': 'PA', 'source__2': 'Agência Brasil', 'city__2': 'Para', 'published_date__2': '13 de ago. de 2025', 'title__2': 'CCJ aprova aumento de pena para aliciamento de crianças na internet', 'url__2': 'https://agenciabrasil.ebc.com.br/politica/noticia/2025-08/ccj-aprova-aumento-de-pena-para-aliciamento-de-criancas-na-internet', 'search_id__3': 46, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3437 characters truncated) ... X8+kWolVYpdI5sYNxe3fCvxR9ilOI9gzlT8sBEq5oRIEc2ZCGB8Rg4wtXYuUqNUTPMu1aamvkj27rJcD6HFKp4ty2GYxx1FdIo/bQqAfmMZjqaynUd+++BNRmVSk7qCtgdtseqkoJXsla5u0f/9k=', 'state__3': 'PA', 'source__3': 'CartaCapital', 'city__3': 'Para', 'published_date__3': '13 de ago. de 2025', 'title__3': 'CCJ aprova aumento de pena para aliciamento de menores pela internet', 'url__3': 'https://www.cartacapital.com.br/politica/ccj-da-camara-discute-aumento-de-pena-para-aliciamento-de-menores-pela-internet/', 'search_id__4': 46, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3397 characters truncated) ... 2B03UvpvexNt/pjjjSLTCMN4IoxZbCx8XI4AicpHVwKSI0YsoDEWt74Ey8hk2jYdjNKZHzPvLaWcwmO3LmRv9LjDBoqSps9REJmA0qwuAAOmBVjWMLEo8IHuelz5nHakKLab9dyf1wDvfcM4wT//Z', 'state__4': None, 'source__4': 'Governo do Paraná', 'city__4': None, 'published_date__4': '12 de set. de 2025', 'title__4': 'PCPR prende seis suspeitos por crimes contra crianças e adolescentes na internet', 'url__4': 'https://www.parana.pr.gov.br/aen/Noticia/PCPR-prende-seis-suspeitos-por-crimes-contra-criancas-e-adolescentes-na-internet', 'search_id__5': 46, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (4313 characters truncated) ... nZjWjpdLKzqodlDYgvkW/7cbU9MyAd6H/AOT/AC4UVNsrN1MpJ8ypXzxkiJGVa7I/eV88EoxqKAhH2HuN46Zo/jQ1f3n+XGCumKKo3+h3R/1A/DhXFNiqF+rI9lHH30VFP6qv3scfWeRMp/uf/9k=', 'state__5': 'PA', 'source__5': 'CNN Brasil' ... 197 parameters truncated ... 'source__27': 'V9 Vitoriosa', 'city__27': 'Para', 'published_date__27': '12 de set. de 2025', 'title__27': 'PC do Paraná cumpre 17 mandados contra suspeitos por crimes contra crianças e adolescentes na internet; homem de 22 anos é preso em Uberlândia', 'url__27': 'https://v9vitoriosa.com.br/pc-do-parana-cumpre-17-mandados-contra-suspeitos-por-crimes-contra-criancas-e-adolescentes-na-internet-homem-de-22-anos-e-preso-em-uberlandia', 'search_id__28': 46, 'snippet__28': '', 'image_url__28': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3049 characters truncated) ... NZ9IrohSlkBAKieAAkmqw40zbN27YtDcZZdUogk+FFuGSrLOEWyra1h0Q4s5lDwoiiIhXA1EgV6K8zdLpQqYhZb9ILS8q0HMhf8Jqdjjht2d0882y4hRCkL8enSu50MCgmLtIVdAkalA+9NkDR//Z', 'state__28': None, 'source__28': 'G1', 'city__28': None, 'published_date__28': '12 de mar. de 2025', 'title__28': 'PF prende 5 suspeitos de abuso sexual de crianças e adolescentes no RS durante operação contra crimes pela internet', 'url__28': 'https://g1.globo.com/rs/rio-grande-do-sul/noticia/2025/03/12/pf-prende-5-suspeitos-de-abuso-sexual-de-criancas-e-adolescentes-no-rs-durante-operacao-contra-crimes-pela-internet.ghtml', 'search_id__29': 46, 'snippet__29': '', 'image_url__29': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3141 characters truncated) ... U9DgAd/fSDxFJeLqd1cXLF1nYsNyOXfdPp/fvrYuDI0fh4uUAJtYpNu4uGLf55Vn3H1nb20lxbwxhYyVcAf0kjfH4UVeMSIqwlcI6mf3U6T8pVcYqvlR1qe4iWMe7nfxNfLeNXQk+Nb1Pdz//2Q==', 'state__29': None, 'source__29': 'CNN Brasil', 'city__29': None, 'published_date__29': '25 de mar. de 2025', 'title__29': 'Adolescente que armazenava conteúdo de abuso sexual é conduzido a delegacia', 'url__29': 'https://www.cnnbrasil.com.br/nacional/norte/pa/adolescente-que-armazenava-conteudo-de-abuso-sexual-e-conduzido-a-delegacia/', 'search_id__30': 46, 'snippet__30': '', 'image_url__30': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3185 characters truncated) ... alPXfAFCVfbAQ9zsdS1RveMMLjnGc3R73IYcEG1sWo5vb1x9qVFycECWwZvmVMLQVkyDqFcrf3ta+LH7QZu6lTXTgHkCVt/zwNJIa2PHi/rjjCxpXkYtIxa+5vjwJ/Dx/31xWdj7Y0ooCgWxpx//Z', 'state__30': None, 'source__30': 'Governo Federal', 'city__30': None, 'published_date__30': '8 de out. de 2025', 'title__30': 'PF deflagra Operação Nacional Proteção Integral III em combate ao abuso sexual de crianças e adolescentes', 'url__30': 'https://www.gov.br/pf/pt-br/assuntos/noticias/2025/10/pf-deflagra-operacao-nacional-protecao-integral-iii-em-combate-ao-abuso-sexual-de-criancas-e-adolescentes', 'search_id__31': 46, 'snippet__31': '', 'image_url__31': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3661 characters truncated) ... kXNz0IxWzAaac22uNr4o1xegl+6ldtyO+b4H12Y1EwiRmADyKhI8CbY88buhyyKrLfZ+n4cU1XJctIToHggN/qbn5Yv0N1plue8SSfnjsKqBYUUBAALDwxRy2V3jn1N7tTKo9A5tjRjpUZeTbP//Z', 'state__31': None, 'source__31': 'ALEAM | Assembleia Legislativa do Estado do Amazonas', 'city__31': None, 'published_date__31': '1 mês atrás', 'title__31': 'Campanha contra aliciamento de crianças e adolescentes intensificada no Carnaval', 'url__31': 'https://www.aleam.gov.br/campanha-contra-aliciamento-de-criancas-e-adolescentes-intensificada-no-carnaval/', 'search_id__32': 46, 'snippet__32': '', 'image_url__32': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (4129 characters truncated) ... eXH+WofxOctq2/EbmtxKYzlPKU9p2R2oCHFlak6bqKbAAegGPvZwoKydBCkglKnU3P/0VbGVPy5UhpLT8p9xpPwoW6pSR5AnDnkmuSYdEEZptkobdVYqBvvY+PXCM/o7mJ3bau4ePPVscaNT/2Q==', 'state__32': None, 'source__32': 'Governo Federal', 'city__32': None, 'published_date__32': '7 de nov. de 2024', 'title__32': 'PF investiga crimes de abuso sexual infantojuvenil na internet — Polícia Federal', 'url__32': 'https://www.gov.br/pf/pt-br/assuntos/noticias/2024/11/pf-investiga-crimes-de-abuso-sexual-infantojuvenil-na-internet'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 47
+Committing batch of 33 items...
+COMMIT ERROR: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_news_url"
+DETAIL:  Key (url)=(https://rollingstone.com.br/musica/espolio-de-michael-jackson-e-processado-por-trafico-de-criancas-por-irmaos-que-alegam-mais-de-uma-decada-de-abuso/) already exists.
+
+[SQL: INSERT INTO news (search_id, title, url, source, snippet, image_url, published_date, city, state) SELECT p0::INTEGER, p1::VARCHAR, p2::VARCHAR, p3::VARCHAR, p4::VARCHAR, p5::VARCHAR, p6::VARCHAR, p7::VARCHAR, p8::VARCHAR FROM (VALUES (%(search_id__0) ... 5131 characters truncated ... , p6, p7, p8, sen_counter) ORDER BY sen_counter RETURNING news.id, news.created_at, news.id AS id__1]
+[parameters: {'search_id__0': 47, 'snippet__0': '', 'image_url__0': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2473 characters truncated) ... OBTm8REitiihd0ILcnk5PPPyqmT1lazXss5to8+WjSsoPIQEZxnrjI4HOMntXFOyZWb7hyR0PH6GvW6gRqwznmkuxWQEYBz6dKCS8U7zSyGQOmTuVJG3MM9yfU0s1H6cT5xJJJIOSe9P6Scuq/9k=', 'state__0': None, 'source__0': 'Rolling Stone Brasil', 'city__0': None, 'published_date__0': '23 de set. de 2025', 'title__0': 'Espólio de Michael Jackson é processado por tráfico de crianças por irmãos que alegam mais de uma década de abuso', 'url__0': 'https://rollingstone.com.br/musica/espolio-de-michael-jackson-e-processado-por-trafico-de-criancas-por-irmaos-que-alegam-mais-de-uma-decada-de-abuso/', 'search_id__1': 47, 'snippet__1': '', 'image_url__1': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2473 characters truncated) ... OBTm8REitiihd0ILcnk5PPPyqmT1lazXss5to8+WjSsoPIQEZxnrjI4HOMntXFOyZWb7hyR0PH6GvW6gRqwznmkuxWQEYBz6dKCS8U7zSyGQOmTuVJG3MM9yfU0s1H6cT5xJJJIOSe9P6Scuq/9k=', 'state__1': None, 'source__1': 'Rolling Stone Brasil', 'city__1': None, 'published_date__1': 'há 2 horas', 'title__1': 'Espólio de Michael Jackson é processado por tráfico de crianças por irmãos que alegam mais de uma década de abuso', 'url__1': 'https://rollingstone.com.br/musica/espolio-de-michael-jackson-e-processado-por-trafico-de-criancas-por-irmaos-que-alegam-mais-de-uma-decada-de-abuso/', 'search_id__2': 47, 'snippet__2': '', 'image_url__2': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3961 characters truncated) ... mPHycqUy0AVetEFvvFABdUft+1Jt+oHyNA5T9xb4n4agStMhlKoU9OAiVHGle3IKHJQ8j8sUviVxRC/BdtSbiRyksrSkLHmlSgQfLf1pvnqOBklWPE5rAqYpJKQ23gev9aX2LGqsf7DagC/uf/9k=', 'state__2': None, 'source__2': 'Portal da Câmara dos Deputados', 'city__2': None, 'published_date__2': '3 semanas atrás', 'title__2': 'Comissão aprova projeto que reforça combate ao tráfico e à exploração sexual de crianças', 'url__2': 'https://www.camara.leg.br/noticias/1244769-comissao-aprova-projeto-que-reforca-combate-ao-trafico-e-a-exploracao-sexual-de-criancas', 'search_id__3': 47, 'snippet__3': '', 'image_url__3': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3389 characters truncated) ... Mco2QCOYJoBiUlOiTHvQECoTsaAxUuKOhOkTQE1OlKCQlMjQEigLFse9WUr2CZ/WgGJJKtSOnzQCdSGwmADrGo60Aw8wWTzoAazrl4b0A4kKASSOoNAXLd9zOUFUpG00BbOiZjegIKHGgBFRmgP/Z', 'state__3': None, 'source__3': 'Tribunal de Justiça da Paraíba', 'city__3': None, 'published_date__3': '2 semanas atrás', 'title__3': 'Exploração sexual infantil e tráfico de pessoas continuam crescendo e desafiam segurança pública', 'url__3': 'https://www.tjpb.jus.br/noticia/exploracao-sexual-infantil-e-trafico-de-pessoas-continuam-crescendo-e-desafiam-seguranca', 'search_id__4': 47, 'snippet__4': '', 'image_url__4': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3341 characters truncated) ... q0G0ihubFLeS2t+CAGCCFQAftXRawBiREgJ55CgGmBpasNzM9/UN3CcRRsbK84obhSMByDBC386YLW98RQQLG0Vy4HRjbE8qIiSRLpLeN2RHTJK9amluLmNtv4uduXUv+lA/hw4j4wiM+TndP/9k=', 'state__4': 'PA', 'source__4': 'Revista Oeste', 'city__4': 'Para', 'published_date__4': '3 semanas atrás', 'title__4': 'Deputados querem CPI para investigar tráfico infantil e exploração sexual de crianças', 'url__4': 'https://revistaoeste.com/politica/deputados-querem-cpi-para-investigar-trafico-infantil-e-exploracao-sexual-de-criancas/', 'search_id__5': 47, 'snippet__5': '', 'image_url__5': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3925 characters truncated) ... TQFcrKqLLXngmM22lZGY9sbkpUAdiMJKv99KcFfV0OIXknpHEMGJbHIs60R4rQTpQ05CXGwnqPhIxzNUHv8bJ92dnNM/oSmYhYx81oJ+pNdAcxVHcmIaJJCrdCcJGdTjCSaXIGOy5NikczDV//9k=', 'state__5': None, 'source__5': 'Partido Liberal' ... 197 parameters truncated ... 'source__27': 'Estadão', 'city__27': None, 'published_date__27': '22 de dez. de 2025', 'title__27': 'Alerta de motorista de Uber ajuda em prisão de americano suspeito de exploração sexual infantil', 'url__27': 'https://www.estadao.com.br/brasil/alerta-de-motorista-de-uber-ajuda-em-prisao-de-americano-suspeito-de-exploracao-sexual-infantil/', 'search_id__28': 47, 'snippet__28': '', 'image_url__28': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (3357 characters truncated) ... jFJpUybxBrP4yUwxvwx/uKQ6vevF4a1a1upgGks5jGjPv8h2FIvEl9PaaVcXUD4mxs3cZrO7GWSe/Z55Hlcwy5Z2LE/Db60RKznt0FFjjArsedCDUVdRk5ooMJtZifK/UUZmlh2l2otWOKsh//9k=', 'state__28': 'SP', 'source__28': 'O Globo', 'city__28': 'Santos', 'published_date__28': '15 de ago. de 2025', 'title__28': 'Hytalo Santos: saiba quem é o influencer preso por tráfico humano e exploração sexual infantil', 'url__28': 'https://oglobo.globo.com/brasil/noticia/2025/08/15/hytalo-santos-saiba-quem-e-o-influencer-preso-por-trafico-humano-e-exploracao-sexual-infantil.ghtml', 'search_id__29': 47, 'snippet__29': '', 'image_url__29': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2953 characters truncated) ... dJskYEMlvGCPL3RSf2uJ7y1XPBkYH6U3j3UCjoOPlTI+kTkfmFbXJgdWnxuHIHnngUTtIVfTYuTlgWIoHqRJ1C4z4SH7012SL7HAMD/LXw9BRCwHcQsh6EetYjG+Ty1M88SNkEcULkQI5A6Vxx//Z', 'state__29': None, 'source__29': 'G1', 'city__29': None, 'published_date__29': '28 de dez. de 2025', 'title__29': 'Motorista de aplicativo ajuda polícia a prender americano suspeito de exploração sexual infantil no Brasil', 'url__29': 'https://g1.globo.com/fantastico/noticia/2025/12/28/motorista-de-aplicativo-ajuda-policia-a-prender-americano-suspeito-de-exploracao-sexual-infantil-no-brasil.ghtml', 'search_id__30': 47, 'snippet__30': '', 'image_url__30': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2705 characters truncated) ... YIpZbS6Gjxb1IF7LVFg0TUtOJ3u3hYD/YST/5qvzua1FtduJYikkFswcYbmQnPrvQfr9rbeH96ht4oGyAUhHKp364/SoTb9Q0oxXjBtiTsBXkiYMSxFPgb14mmEE4I7ikMwz2rshPKKZXegD/2Q==', 'state__30': None, 'source__30': 'Câmara Municipal de Campo Grande', 'city__30': None, 'published_date__30': '23 de set. de 2025', 'title__30': 'Vereador faz alerta no Dia Internacional contra a Exploração Sexual e o Tráfico de Mulheres e Crianças', 'url__30': 'https://camara.ms.gov.br/vereador-delei-pinheiro/vereador-faz-alerta-no-dia-internacional-contra-a-exploracao-sexual-e-o-trafico-de-mulheres-e-criancas/', 'search_id__31': 47, 'snippet__31': '', 'image_url__31': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2289 characters truncated) ... 3wxHZRXlzbzMbeCVYxzkZJboB8/n6ULUbcTxLFopZc5MgJyfGgxlAQH5milgoba6PbqjzxrIWCFgGKjJx5Vt39lBpEbPHG05cco7xHsnp4E1gjrXSSV3QB2J5emag0TSOZOaalSoEKnzTUqAP/9k=', 'state__31': 'SP', 'source__31': 'G1', 'city__31': 'Santos', 'published_date__31': '15 de set. de 2025', 'title__31': 'MP denuncia Hytalo Santos e marido por tráfico de pessoas, produção de conteúdo pornográfico infantil e exploração sexual', 'url__31': 'https://g1.globo.com/pb/paraiba/noticia/2025/09/15/ministerio-publico-denuncia-hytalo-santos-trafico-de-pessoas-pornografia-infantil-exploracao-sexual.ghtml', 'search_id__32': 47, 'snippet__32': '', 'image_url__32': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQ ... (2769 characters truncated) ... J0+yZzg75NvC+tYiS1kkk8+7k3ueceytj4vu5FuIbNNqwbQ+1RjJrNz8xknrWsY5joustX2J7ZDNPJK3/AMr7hRwj5UUNp34G9TRq/iFaAbPY03LvPQMePbzUyin/AHMsfccAVWDmRl7KOKvqEP/Z', 'state__32': 'SP', 'source__32': 'Valor Econômico', 'city__32': 'Santos', 'published_date__32': '15 de ago. de 2025', 'title__32': 'O que é tráfico humano e outros quatro crimes dos quais Hytalo Santos é suspeito', 'url__32': 'https://valor.globo.com/brasil/noticia/2025/08/15/o-que-e-trafico-humano-e-outros-quatro-crimes-de-que-hytalo-santos-e-suspeito.ghtml'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 48
+Committing batch of 30 items...
+Committed batch successfully.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 49
+Committing batch of 29 items...
+Committed batch successfully.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 50
+Committing batch of 29 items...
+Committed batch successfully.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 51
+Committing batch of 24 items...
+Committed batch successfully.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 52
+Committing batch of 25 items...
+Committed batch successfully.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 53
+Committing batch of 29 items...
+Committed batch successfully.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 55
+No new items to commit in this batch.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 56
+Committing batch of 8 items...
+Committed batch successfully.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 57
+No new items to commit in this batch.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 58
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 59
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 60
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 61
+Committing batch of 30 items...
+Committed batch successfully.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 62
+Committing batch of 28 items...
+Committed batch successfully.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 63
+Committing batch of 27 items...
+Committed batch successfully.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 64
+Committing batch of 28 items...
+Committed batch successfully.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 65
+Committing batch of 30 items...
+Committed batch successfully.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 66
+Committing batch of 30 items...
+Committed batch successfully.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 67
+No new items to commit in this batch.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 0 results for query 'abuso de menores prisão'
+Created Search Record ID: 68
+No new items to commit in this batch.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 69
+Committing batch of 1 items...
+Committed batch successfully.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 70
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 71
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 72
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 73
+No new items to commit in this batch.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 74
+Committing batch of 1 items...
+Committed batch successfully.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 75
+No new items to commit in this batch.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 77
+No new items to commit in this batch.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 78
+No new items to commit in this batch.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 79
+No new items to commit in this batch.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 80
+Committing batch of 4 items...
+Committed batch successfully.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 81
+Committing batch of 1 items...
+Committed batch successfully.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 82
+No new items to commit in this batch.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 83
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 84
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 85
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 86
+No new items to commit in this batch.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 87
+No new items to commit in this batch.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 88
+No new items to commit in this batch.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 89
+No new items to commit in this batch.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 90
+No new items to commit in this batch.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 91
+No new items to commit in this batch.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 92
+No new items to commit in this batch.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 22 results for query 'abuso de menores prisão'
+Created Search Record ID: 93
+No new items to commit in this batch.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 94
+No new items to commit in this batch.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 27 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 95
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 96
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 97
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 98
+No new items to commit in this batch.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 99
+No new items to commit in this batch.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 100
+No new items to commit in this batch.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 101
+No new items to commit in this batch.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 102
+No new items to commit in this batch.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 103
+Committing batch of 1 items...
+Committed batch successfully.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 104
+No new items to commit in this batch.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 105
+No new items to commit in this batch.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 106
+No new items to commit in this batch.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 29 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 107
+Committing batch of 2 items...
+Committed batch successfully.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 108
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 109
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 110
+No new items to commit in this batch.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 111
+No new items to commit in this batch.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 112
+No new items to commit in this batch.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 113
+No new items to commit in this batch.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 114
+No new items to commit in this batch.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 115
+No new items to commit in this batch.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 33 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 116
+No new items to commit in this batch.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 33 results for query 'abuso de menores prisão'
+Created Search Record ID: 117
+No new items to commit in this batch.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 33 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 118
+No new items to commit in this batch.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 25 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 119
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 33 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 120
+No new items to commit in this batch.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 33 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 121
+No new items to commit in this batch.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 33 results for query 'pedofilia investigação'
+Created Search Record ID: 122
+No new items to commit in this batch.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 33 results for query 'crime sexual contra menor'
+Created Search Record ID: 123
+No new items to commit in this batch.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 33 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 124
+No new items to commit in this batch.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 33 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 125
+No new items to commit in this batch.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 33 results for query 'caso abuso sexual creche'
+Created Search Record ID: 126
+No new items to commit in this batch.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 33 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 127
+No new items to commit in this batch.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infantil condenação
+RPA Result Status: success
+Found 110 results for query 'exploração sexual infantil condenação'
+Created Search Record ID: 131
+Committing batch of 72 items...
+Committed batch successfully.
+Scanning query: abuso de menores prisão
+RPA Result Status: success
+Found 0 results for query 'abuso de menores prisão'
+Created Search Record ID: 132
+No new items to commit in this batch.
+Scanning query: estupro de vulnerável operação policial
+RPA Result Status: success
+Found 85 results for query 'estupro de vulnerável operação policial'
+Created Search Record ID: 133
+Committing batch of 47 items...
+Committed batch successfully.
+Scanning query: rede de pedofilia desarticulada
+RPA Result Status: success
+Found 25 results for query 'rede de pedofilia desarticulada'
+Created Search Record ID: 134
+No new items to commit in this batch.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 79 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 135
+Committing batch of 42 items...
+Committed batch successfully.
+Scanning query: tráfico de crianças para exploração sexual
+RPA Result Status: success
+Found 110 results for query 'tráfico de crianças para exploração sexual'
+Created Search Record ID: 136
+Committing batch of 68 items...
+Committed batch successfully.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 110 results for query 'pedofilia investigação'
+Created Search Record ID: 137
+Committing batch of 76 items...
+Committed batch successfully.
+Scanning query: crime sexual contra menor
+RPA Result Status: success
+Found 110 results for query 'crime sexual contra menor'
+Created Search Record ID: 138
+Committing batch of 64 items...
+Committed batch successfully.
+Scanning query: prisão por pornografia infantil
+RPA Result Status: success
+Found 110 results for query 'prisão por pornografia infantil'
+Created Search Record ID: 139
+Committing batch of 67 items...
+Committed batch successfully.
+Scanning query: operação policia federal abuso infantil
+RPA Result Status: success
+Found 110 results for query 'operação policia federal abuso infantil'
+Created Search Record ID: 140
+Committing batch of 62 items...
+Committed batch successfully.
+Scanning query: caso abuso sexual creche
+RPA Result Status: success
+Found 68 results for query 'caso abuso sexual creche'
+Created Search Record ID: 141
+Committing batch of 32 items...
+Committed batch successfully.
+Scanning query: condenação estupro vulnerável
+RPA Result Status: success
+Found 110 results for query 'condenação estupro vulnerável'
+Created Search Record ID: 142
+Committing batch of 66 items...
+Committed batch successfully.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infanto juvenil
+RPA Result Status: success
+Found 104 results for query 'exploração sexual infanto juvenil'
+Created Search Record ID: 180
+Committing batch of 69 items...
+Committed batch successfully.
+Scanning query: exploração sexual de vulnerável
+RPA Result Status: success
+Found 103 results for query 'exploração sexual de vulnerável'
+Created Search Record ID: 181
+Committing batch of 77 items...
+Committed batch successfully.
+Scanning query: abuso sexual infantil
+RPA Result Status: success
+Found 106 results for query 'abuso sexual infantil'
+Created Search Record ID: 182
+Committing batch of 55 items...
+Committed batch successfully.
+Scanning query: abuso sexual de incapaz
+RPA Result Status: success
+Found 35 results for query 'abuso sexual de incapaz'
+Created Search Record ID: 183
+Committing batch of 33 items...
+Committed batch successfully.
+Scanning query: estupro de vulnerável
+RPA Result Status: success
+Found 105 results for query 'estupro de vulnerável'
+Created Search Record ID: 184
+Committing batch of 82 items...
+Committed batch successfully.
+Scanning query: violência sexual contra mulheres
+RPA Result Status: success
+Found 62 results for query 'violência sexual contra mulheres'
+Created Search Record ID: 185
+Committing batch of 52 items...
+Committed batch successfully.
+Scanning query: violência sexual contra menores
+RPA Result Status: success
+Found 100 results for query 'violência sexual contra menores'
+Created Search Record ID: 186
+Committing batch of 64 items...
+Committed batch successfully.
+Scanning query: tráfico sexual
+RPA Result Status: success
+Found 90 results for query 'tráfico sexual'
+Created Search Record ID: 187
+Committing batch of 71 items...
+Committed batch successfully.
+Scanning query: tráfico de pessoas exploração sexual
+RPA Result Status: success
+Found 86 results for query 'tráfico de pessoas exploração sexual'
+Created Search Record ID: 188
+Committing batch of 41 items...
+Committed batch successfully.
+Scanning query: predador sexual prisão
+RPA Result Status: success
+Found 75 results for query 'predador sexual prisão'
+Created Search Record ID: 189
+Committing batch of 64 items...
+Committed batch successfully.
+Scanning query: pornografia infantil operação policial
+RPA Result Status: success
+Found 103 results for query 'pornografia infantil operação policial'
+Created Search Record ID: 190
+Committing batch of 73 items...
+Committed batch successfully.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 106 results for query 'pedofilia investigação'
+Created Search Record ID: 191
+Committing batch of 10 items...
+Committed batch successfully.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 66 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 192
+Committing batch of 14 items...
+Committed batch successfully.
+Scanning query: crime sexual contra vulneráveis
+RPA Result Status: success
+Found 95 results for query 'crime sexual contra vulneráveis'
+Created Search Record ID: 193
+Committing batch of 56 items...
+Committed batch successfully.
+DB URL in Scan: postgresql://reveal_user:***@localhost/reveal_db
+Scanning query: exploração sexual infanto juvenil
+RPA Result Status: success
+Found 106 results for query 'exploração sexual infanto juvenil'
+Created Search Record ID: 253
+Committing batch of 96 items...
+Committed batch successfully.
+Scanning query: exploração sexual de vulnerável
+RPA Result Status: success
+Found 102 results for query 'exploração sexual de vulnerável'
+Created Search Record ID: 254
+Committing batch of 92 items...
+Committed batch successfully.
+Scanning query: abuso sexual infantil
+RPA Result Status: success
+Found 106 results for query 'abuso sexual infantil'
+Created Search Record ID: 255
+Committing batch of 89 items...
+Committed batch successfully.
+Scanning query: abuso sexual de incapaz
+RPA Result Status: success
+Found 40 results for query 'abuso sexual de incapaz'
+Created Search Record ID: 256
+Committing batch of 36 items...
+Committed batch successfully.
+Scanning query: estupro de vulnerável
+RPA Result Status: success
+Found 0 results for query 'estupro de vulnerável'
+Created Search Record ID: 257
+No new items to commit in this batch.
+Scanning query: violência sexual contra mulheres
+RPA Result Status: success
+Found 65 results for query 'violência sexual contra mulheres'
+Created Search Record ID: 258
+Committing batch of 59 items...
+Committed batch successfully.
+Scanning query: violência sexual contra menores
+RPA Result Status: success
+Found 101 results for query 'violência sexual contra menores'
+Created Search Record ID: 259
+Committing batch of 66 items...
+Committed batch successfully.
+Scanning query: tráfico sexual
+RPA Result Status: success
+Found 91 results for query 'tráfico sexual'
+Created Search Record ID: 260
+Committing batch of 82 items...
+Committed batch successfully.
+Scanning query: tráfico de pessoas exploração sexual
+RPA Result Status: success
+Found 86 results for query 'tráfico de pessoas exploração sexual'
+Created Search Record ID: 261
+Committing batch of 46 items...
+Committed batch successfully.
+Scanning query: predador sexual prisão
+RPA Result Status: success
+Found 78 results for query 'predador sexual prisão'
+Created Search Record ID: 262
+Committing batch of 70 items...
+Committed batch successfully.
+Scanning query: pornografia infantil operação policial
+RPA Result Status: success
+Found 102 results for query 'pornografia infantil operação policial'
+Created Search Record ID: 263
+Committing batch of 91 items...
+Committed batch successfully.
+Scanning query: pedofilia investigação
+RPA Result Status: success
+Found 105 results for query 'pedofilia investigação'
+Created Search Record ID: 264
+Committing batch of 90 items...
+Committed batch successfully.
+Scanning query: aliciamento de menores internet crime
+RPA Result Status: success
+Found 58 results for query 'aliciamento de menores internet crime'
+Created Search Record ID: 265
+Committing batch of 52 items...
+Committed batch successfully.
+Scanning query: crime sexual contra vulneráveis
+RPA Result Status: success
+Found 95 results for query 'crime sexual contra vulneráveis'
+Created Search Record ID: 266
+Committing batch of 66 items...
+Committed batch successfully.
