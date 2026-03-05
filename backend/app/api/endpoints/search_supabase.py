@@ -5,7 +5,7 @@ from app.rpa.google_news import GoogleNewsRPA
 from app.rpa.google_web import GoogleWebRPA
 from app.core.supabase import get_supabase
 from typing import Any
-from app.api.endpoints.stats import TRIBUNAL_TO_STATE, COORDS, CNJ_CODE_MAP
+from app.core.constants import TRIBUNAL_TO_STATE, COORDS, CNJ_CODE_MAP
 import json
 import unicodedata
 import re
