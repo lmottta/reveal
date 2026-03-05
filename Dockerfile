@@ -22,11 +22,8 @@ COPY backend/ .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
-
-# Expose the port
-EXPOSE $PORT
+# Removing EXPOSE to let Railway route to PORT automatically
 
 # Command to run the application
-# Use shell form to expand $PORT variable with a default fallback
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Use shell form to expand $PORT variable with a default fallback and exec to pass signals
+CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'
