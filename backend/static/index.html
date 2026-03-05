@@ -3,74 +3,349 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reveal</title>
+    <title>JuriPopular | Expondo o que a justiça esconde</title>
     <style>
       :root {
         color-scheme: dark;
       }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         background: #0b0b12;
         color: #f2f2f7;
       }
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 48px 24px;
+      header {
+        padding: 24px;
+        border-bottom: 1px solid #1f2030;
+        background: #0e0f18;
       }
-      h1 {
-        font-size: 32px;
-        margin: 0 0 12px;
+      header h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+        letter-spacing: 0.3px;
       }
-      p {
-        margin: 0 0 16px;
-        line-height: 1.5;
-        color: #c8c8d4;
+      header p {
+        margin: 0;
+        color: #b8bac9;
       }
-      .card {
-        background: #141426;
-        border: 1px solid #23233a;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 16px 0;
-      }
-      .links {
+      .layout {
         display: grid;
+        grid-template-columns: 320px 1fr;
+        min-height: calc(100vh - 82px);
+      }
+      .sidebar {
+        padding: 24px;
+        border-right: 1px solid #1f2030;
+        background: #0c0d15;
+      }
+      .sidebar h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+      .actions {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      button {
+        background: #2f5ef5;
+        color: #fff;
+        border: 0;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #1d1f2c;
+        color: #d7d9e7;
+      }
+      .filters {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 12px;
+        background: #12131e;
+        border: 1px solid #1f2030;
+        position: relative;
+        z-index: 1500;
+      }
+      .filters label {
+        display: flex;
+        align-items: center;
         gap: 8px;
+        font-size: 14px;
       }
-      a {
-        color: #8ab4ff;
-        text-decoration: none;
+      .filters span {
+        transition: all 0.2s ease;
       }
-      a:hover {
-        text-decoration: underline;
+      .opacity-40 {
+        opacity: 0.4;
       }
-      code {
-        background: #0f0f1d;
-        padding: 2px 6px;
-        border-radius: 6px;
-        font-size: 90%;
+      .line-through {
+        text-decoration: line-through;
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+        min-height: 520px;
+        background: radial-gradient(circle at top, #1a1b2b 0%, #0b0b12 55%, #070710 100%);
+      }
+      .catalog-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 4, 10, 0.76);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 2100;
+      }
+      .catalog-modal.open {
+        display: flex;
+      }
+      .catalog-card {
+        width: min(1100px, 92vw);
+        max-height: 88vh;
+        background: #101120;
+        border-radius: 16px;
+        border: 1px solid #262842;
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+        overflow: hidden;
+      }
+      .catalog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .catalog-header h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .catalog-controls {
+        display: flex;
+        gap: 12px;
+      }
+      .catalog-controls select {
+        background: #14162a;
+        color: #e6e7f2;
+        border: 1px solid #2a2d4a;
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      #catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        overflow: auto;
+        padding-right: 8px;
+      }
+      .catalog-item {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #2a2d4a;
+        background: #11131f;
+        cursor: pointer;
+        min-height: 120px;
+      }
+      .catalog-item h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+        color: #f7f7ff;
+      }
+      .catalog-item p {
+        margin: 0;
+        font-size: 12px;
+        color: #b4b6c7;
+      }
+      .bg-blue-900\/10 {
+        background: rgba(30, 64, 175, 0.12);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+      .bg-white\/5 {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      #modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(3, 3, 10, 0.78);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2400;
+        padding: 24px;
+      }
+      #modal-overlay.open {
+        display: flex;
+      }
+      .modal-card {
+        background: #0f1122;
+        border: 1px solid #2a2d4a;
+        border-radius: 14px;
+        padding: 20px;
+        width: min(720px, 92vw);
+      }
+      .modal-card h3 {
+        margin: 0 0 8px;
+      }
+      .meta {
+        display: grid;
+        gap: 6px;
+        color: #b9bbce;
+        font-size: 13px;
+      }
+      @media (max-width: 860px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid #1f2030;
+        }
+        #map {
+          min-height: 420px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>Reveal</h1>
-      <p>API ativa e pronta para uso.</p>
-      <div class="card">
-        <div class="links">
-          <a href="/health">/health</a>
-          <a href="/docs">/docs</a>
-          <a href="/diagnostics">/diagnostics</a>
-          <a href="/api/v1/search">/api/v1/search</a>
-          <a href="/api/v1/stats">/api/v1/stats</a>
+    <header>
+      <h1>JuriPopular</h1>
+      <p>Expondo o que a justiça esconde</p>
+    </header>
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="actions">
+          <button onclick="openCatalog()">CATÁLOGO DE NOTÍCIAS</button>
+          <button class="secondary" onclick="openCatalog()">CATÁLOGO</button>
         </div>
-      </div>
-      <div class="card">
-        <p>Se você esperava uma interface completa, ela não está presente no repositório atual. Esta página confirma disponibilidade da API e oferece endpoints principais.</p>
-        <p>Para servir uma interface customizada, publique os arquivos em <code>backend/static</code> e mantenha a rota raiz apontando para <code>/static/index.html</code>.</p>
+        <h2>Filtros de Mapa</h2>
+        <div class="filters">
+          <label>
+            <input id="layer-news" type="checkbox" checked />
+            <span>MÍDIA / NOTÍCIAS</span>
+          </label>
+          <label>
+            <input id="layer-judicial" type="checkbox" checked />
+            <span>PROCESSOS JUDICIAIS</span>
+          </label>
+        </div>
+      </aside>
+      <section id="map"></section>
+    </main>
+    <div id="catalog-view" class="catalog-modal" aria-hidden="true">
+      <div class="catalog-card">
+        <div class="catalog-header">
+          <h2>CATÁLOGO DE INTELIGÊNCIA</h2>
+          <div class="catalog-controls">
+            <select id="filter-type">
+              <option value="all">Todos</option>
+              <option value="judicial">Judicial</option>
+              <option value="news">Notícias</option>
+            </select>
+            <button class="secondary" onclick="closeCatalog()">Fechar</button>
+          </div>
+        </div>
+        <div id="catalog-grid"></div>
       </div>
     </div>
+    <div id="modal-overlay" aria-hidden="true">
+      <div class="modal-card" id="modal-content"></div>
+    </div>
+    <script>
+      const catalogView = document.getElementById("catalog-view")
+      const catalogGrid = document.getElementById("catalog-grid")
+      const filterType = document.getElementById("filter-type")
+      const modalOverlay = document.getElementById("modal-overlay")
+      const modalContent = document.getElementById("modal-content")
+
+      function openCatalog() {
+        catalogView.classList.add("open")
+        catalogView.setAttribute("aria-hidden", "false")
+        fetchCatalog()
+      }
+
+      function closeCatalog() {
+        catalogView.classList.remove("open")
+        catalogView.setAttribute("aria-hidden", "true")
+      }
+
+      function closeModal() {
+        modalOverlay.classList.remove("open")
+        modalOverlay.setAttribute("aria-hidden", "true")
+      }
+
+      function openModal(item) {
+        modalContent.innerHTML = `
+          <h3>${item.title || "Detalhes"}</h3>
+          <div class="meta">
+            <div><strong>Tipo:</strong> ${item.type}</div>
+            <div><strong>Fonte:</strong> ${item.source || "-"}</div>
+            <div><strong>Cidade/UF:</strong> ${item.city || "N/A"} ${item.state || ""}</div>
+            <div><strong>Resumo:</strong> ${item.snippet || "-"}</div>
+          </div>
+        `
+        modalOverlay.classList.add("open")
+        modalOverlay.setAttribute("aria-hidden", "false")
+      }
+
+      function renderCatalog(items) {
+        catalogGrid.innerHTML = ""
+        items.forEach((item) => {
+          const card = document.createElement("div")
+          const isJudicial = item.type === "judicial"
+          card.className = `catalog-item ${isJudicial ? "bg-blue-900/10" : "bg-white/5"}`
+          card.innerHTML = `
+            <h3>${isJudicial ? "⚖️" : "📰"} ${item.title || "Sem título"}</h3>
+            <p>${item.snippet || "Sem descrição disponível"}</p>
+          `
+          card.addEventListener("click", () => openModal(item))
+          catalogGrid.appendChild(card)
+        })
+      }
+
+      async function fetchCatalog() {
+        const sourceType = filterType.value
+        const response = await fetch(`/api/v1/search/catalog?source_type=${sourceType}&limit=50`)
+        if (!response.ok) {
+          renderCatalog([])
+          return
+        }
+        const data = await response.json()
+        renderCatalog(Array.isArray(data) ? data : [])
+      }
+
+      function syncLayerLabel(inputId) {
+        const input = document.getElementById(inputId)
+        const label = input.closest("label").querySelector("span")
+        if (input.checked) {
+          label.classList.remove("opacity-40", "line-through")
+        } else {
+          label.classList.add("opacity-40", "line-through")
+        }
+      }
+
+      document.getElementById("layer-news").addEventListener("change", () => syncLayerLabel("layer-news"))
+      document.getElementById("layer-judicial").addEventListener("change", () => syncLayerLabel("layer-judicial"))
+      filterType.addEventListener("change", fetchCatalog)
+      modalOverlay.addEventListener("click", closeModal)
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeModal()
+          closeCatalog()
+        }
+      })
+
+      syncLayerLabel("layer-news")
+      syncLayerLabel("layer-judicial")
+      window.addEventListener("load", openCatalog)
+    </script>
   </body>
 </html>
