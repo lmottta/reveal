@@ -24,6 +24,7 @@ coverage.xml
 backend/scan_log.txt
 *.png
 *.html
+!backend/static/index.html
 docker-compose.yml
 README.md
 LICENSE

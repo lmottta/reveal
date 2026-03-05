@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reveal</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #0b0b12;
+        color: #f2f2f7;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+      h1 {
+        font-size: 32px;
+        margin: 0 0 12px;
+      }
+      p {
+        margin: 0 0 16px;
+        line-height: 1.5;
+        color: #c8c8d4;
+      }
+      .card {
+        background: #141426;
+        border: 1px solid #23233a;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 16px 0;
+      }
+      .links {
+        display: grid;
+        gap: 8px;
+      }
+      a {
+        color: #8ab4ff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        background: #0f0f1d;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 90%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Reveal</h1>
+      <p>API ativa e pronta para uso.</p>
+      <div class="card">
+        <div class="links">
+          <a href="/health">/health</a>
+          <a href="/docs">/docs</a>
+          <a href="/diagnostics">/diagnostics</a>
+          <a href="/api/v1/search">/api/v1/search</a>
+          <a href="/api/v1/stats">/api/v1/stats</a>
+        </div>
+      </div>
+      <div class="card">
+        <p>Se você esperava uma interface completa, ela não está presente no repositório atual. Esta página confirma disponibilidade da API e oferece endpoints principais.</p>
+        <p>Para servir uma interface customizada, publique os arquivos em <code>backend/static</code> e mantenha a rota raiz apontando para <code>/static/index.html</code>.</p>
+      </div>
+    </div>
+  </body>
+</html>
