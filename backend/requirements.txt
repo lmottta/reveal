@@ -14,3 +14,5 @@ realtime
 storage3
 httpx
 pydantic-settings
+psycopg2-binary
+python-multipart
