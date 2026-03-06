@@ -1,4 +1,5 @@
 from typing import Dict, Any, List
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 # from playwright.sync_api import sync_playwright # Lazy import
 import time
 import re
@@ -153,6 +154,7 @@ class GoogleNewsRPA(BaseRPA):
                 
                 browser.close()
 
+                results = self._dedupe_results(results)
                 return {
                     "source": "Google News",
                     "status": "success",
@@ -166,3 +168,34 @@ class GoogleNewsRPA(BaseRPA):
                 "status": "error",
                 "error": str(e)
             }
+
+    def _normalize_url(self, url: str) -> str:
+        if not url:
+            return ""
+        try:
+            parts = urlsplit(url.strip())
+            query_items = [
+                (k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+                if not k.lower().startswith("utm_") and k.lower() not in {"gclid", "fbclid", "igshid", "mc_cid", "mc_eid"}
+            ]
+            query = urlencode(query_items, doseq=True)
+            return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), query, ""))
+        except Exception:
+            return url.strip()
+
+    def _dedupe_results(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        seen = set()
+        unique_items = []
+        for item in items:
+            url = self._normalize_url(item.get("url", ""))
+            if url:
+                item["url"] = url
+            title = str(item.get("title") or "").strip().lower()
+            source = str(item.get("source") or "").strip().lower()
+            date_val = str(item.get("published_date") or "").strip().lower()
+            key = f"{url or title}|{source}|{date_val}"
+            if key in seen:
+                continue
+            seen.add(key)
+            unique_items.append(item)
+        return unique_items

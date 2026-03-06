@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import or_, cast, String, text
 from sqlalchemy.orm import Session
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from app.rpa.tjsp import TJSPRPA
 from app.rpa.tjmt import TJMTRPA
 from app.rpa.google_news import GoogleNewsRPA
@@ -38,6 +39,21 @@ RELEVANT_KEYWORDS = [
     "VIOLENCIA SEXUAL CONTRA MULHER",
     "VIOLENCIA SEXUAL CONTRA MULHERES"
 ]
+
+def normalize_url(value: str) -> str:
+    if not value:
+        return ""
+    try:
+        parts = urlsplit(value.strip())
+        query_items = [
+            (k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+            if not k.lower().startswith("utm_") and k.lower() not in {"gclid", "fbclid", "igshid", "mc_cid", "mc_eid"}
+        ]
+        query = urlencode(query_items, doseq=True)
+        path = parts.path.rstrip("/")
+        return urlunsplit((parts.scheme, parts.netloc, path, query, "")).lower()
+    except Exception:
+        return value.strip().lower()
 
 def normalize_text(value: str) -> str:
     if not value:
@@ -624,5 +640,56 @@ def list_catalog(
 
     # Ordenar final por data (misturando news e judicial)
     results.sort(key=lambda x: x["created_at"] or "", reverse=True)
+
+    def build_dedupe_key(item: dict) -> str:
+        item_type = item.get("type")
+        if item_type == "news":
+            url = normalize_url(item.get("url") or "")
+            if url:
+                return f"news:{url}"
+            title = (item.get("title") or "").strip().lower()
+            source = (item.get("source") or "").strip().lower()
+            published = str(item.get("published_date") or "").strip().lower()
+            return f"news:{title}|{source}|{published}"
+        raw_process = item.get("processo") or item.get("numero_processo") or item.get("id")
+        process_key = re.sub(r"\D", "", str(raw_process or ""))
+        if process_key:
+            return f"judicial:{process_key}"
+        title = (item.get("title") or "").strip().lower()
+        source = (item.get("source") or "").strip().lower()
+        return f"judicial:{title}|{source}"
+
+    unique_results = []
+    seen = set()
+    for item in results:
+        key = build_dedupe_key(item)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_results.append(item)
     
-    return results[:limit]
+    return unique_results[:limit]
+
+@router.delete("/clean/news")
+def clean_news_duplicates(limit: int = 5000, db: Session = Depends(get_db)):
+    if limit < 1 or limit > 50000:
+        raise HTTPException(status_code=400, detail="Invalid limit")
+    news_items = db.query(News).order_by(News.created_at.desc()).limit(limit).all()
+    seen = set()
+    duplicate_ids = []
+    for n in news_items:
+        url_key = normalize_url(n.url or "")
+        if not url_key:
+            title = (n.title or "").strip().lower()
+            source = (n.source or "").strip().lower()
+            published = (n.published_date or "").strip().lower()
+            url_key = f"{title}|{source}|{published}"
+        if url_key in seen:
+            duplicate_ids.append(n.id)
+        else:
+            seen.add(url_key)
+    removed = 0
+    if duplicate_ids:
+        removed = db.query(News).filter(News.id.in_(duplicate_ids)).delete(synchronize_session=False)
+        db.commit()
+    return {"removed": removed, "scanned": len(news_items)}

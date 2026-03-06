@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import json
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.search import Search, SearchResult
@@ -27,6 +28,18 @@ def run_rpa_for_tribunal(rpa_instance, tribunal_name, query, db: Session):
         
         if result.get("status") == "success":
             results_list = result.get("results", [])
+            seen = set()
+            unique_results = []
+            for item in results_list:
+                raw_process = item.get("processo") or item.get("numero_processo") or item.get("id")
+                key = str(raw_process or "").strip()
+                if not key:
+                    key = json.dumps(item, sort_keys=True, ensure_ascii=False)
+                if key in seen:
+                    continue
+                seen.add(key)
+                unique_results.append(item)
+            results_list = unique_results
             print(f"[{tribunal_name}] Encontrados {len(results_list)} processos.")
             
             if results_list:

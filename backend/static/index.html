@@ -4,83 +4,358 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JuriPopular | Expondo o que a justiça esconde</title>
+    <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
         color-scheme: dark;
+        --bg: #040407;
+        --panel: rgba(10, 10, 14, 0.92);
+        --panel-strong: rgba(14, 14, 20, 0.98);
+        --border: rgba(255, 255, 255, 0.1);
+        --accent: #e10b1a;
+        --accent-soft: rgba(96, 12, 20, 0.55);
+        --blue: #3b82f6;
+        --pink: #ff4bd8;
+        --text: #f6f2f2;
+        --muted: #b9b0b3;
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
       }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
-        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #0b0b12;
-        color: #f2f2f7;
+        font-family: "Manrope", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        background-image: url("/static/img/background.png");
+        background-repeat: no-repeat;
+        background-size: 720px;
+        background-position: 12% 10%;
+      }
+      body.map-fullscreen {
+        overflow: hidden;
+      }
+      .app {
+        min-height: 100vh;
+        backdrop-filter: blur(8px);
+        background: linear-gradient(120deg, rgba(5, 5, 8, 0.96) 0%, rgba(5, 5, 8, 0.86) 42%, rgba(5, 5, 8, 0.98) 100%);
       }
       header {
-        padding: 24px;
-        border-bottom: 1px solid #1f2030;
-        background: #0e0f18;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 28px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(5, 5, 8, 0.88);
       }
-      header h1 {
-        margin: 0 0 6px;
-        font-size: 28px;
-        letter-spacing: 0.3px;
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
       }
-      header p {
+      .brand-logo {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 18px rgba(255, 255, 255, 0.2));
+      }
+      .brand h1 {
+        font-family: "Cinzel", serif;
+        letter-spacing: 1px;
         margin: 0;
-        color: #b8bac9;
+        font-size: 26px;
+      }
+      .brand span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 2px;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .btn {
+        padding: 10px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        background: rgba(14, 14, 20, 0.9);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .btn.primary {
+        background: linear-gradient(135deg, #1c1c26 0%, #14141d 60%, rgba(229, 9, 20, 0.2) 100%);
+        border-color: rgba(229, 9, 20, 0.5);
+        color: #fff;
+      }
+      .session {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
       .layout {
         display: grid;
-        grid-template-columns: 320px 1fr;
-        min-height: calc(100vh - 82px);
-      }
-      .sidebar {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 24px;
         padding: 24px;
-        border-right: 1px solid #1f2030;
-        background: #0c0d15;
+        max-width: 1600px;
+        margin: 0 auto;
       }
-      .sidebar h2 {
-        margin: 0 0 12px;
-        font-size: 18px;
-      }
-      .actions {
+      .side-panel {
+        position: sticky;
+        top: 24px;
+        height: fit-content;
         display: grid;
         gap: 12px;
-        margin-bottom: 24px;
       }
-      button {
-        background: #2f5ef5;
-        color: #fff;
-        border: 0;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
+      .panel-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: var(--shadow);
       }
-      button.secondary {
-        background: #1d1f2c;
-        color: #d7d9e7;
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
-      .filters {
-        display: grid;
+      .view-section {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      .view-section.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .map-shell {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #1d1e25;
+        height: 70vh;
+        min-height: 500px;
+        box-shadow: var(--shadow);
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      .catalog-toolbar {
+        display: flex;
+        flex-wrap: wrap;
         gap: 12px;
+        margin-bottom: 20px;
+        background: var(--panel);
         padding: 16px;
         border-radius: 12px;
-        background: #12131e;
-        border: 1px solid #1f2030;
-        position: relative;
-        z-index: 1500;
+        border: 1px solid var(--border);
+        align-items: center;
       }
-      .filters label {
+      .catalog-toolbar h2 {
+        margin: 0;
+        margin-right: auto;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .catalog-toolbar input, 
+      .catalog-toolbar select {
+        background: #0e0e14;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .catalog-toolbar button {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      .catalog-toolbar button:hover {
+        background: var(--accent);
+        color: white;
+      }
+      .nav-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 4px;
+      }
+      .nav-tab {
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: var(--muted);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+      .nav-tab:hover {
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+      }
+      .nav-tab.active {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+      }
+      .loader-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(5,5,8,0.94);
+        background-image: linear-gradient(rgba(5, 5, 8, 0.92), rgba(5, 5, 8, 0.92)), url("/static/img/background.png");
+        background-repeat: no-repeat;
+        background-size: 480px;
+        background-position: center;
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .loader-overlay.visible {
+        display: flex;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255,255,255,0.1);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .loading-text {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text);
+        text-align: center;
+        max-width: 520px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: rgba(8, 8, 12, 0.7);
+        border: 1px solid rgba(225, 11, 26, 0.28);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      }
+
+      .panel-box h3 {
+        margin: 0 0 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+      .panel-box .kpi-list {
+        gap: 4px;
+      }
+      .search-field {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .search-field input {
+        flex: 1;
+        padding: 10px 12px;
+        background: #0e0e14;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+      }
+      .search-field button {
+        padding: 10px 12px;
+        background: #1f1f2b;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .kpi-list {
+        display: grid;
+        gap: 4px;
+        font-size: 12px;
+        color: #c5c5cf;
+      }
+      .kpi-sample {
+        margin-top: 6px;
+        font-size: 10px;
+        gap: 2px;
+        color: #9a9aa6;
+      }
+      .kpi-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .kpi-item:last-child {
+        border-bottom: none;
+      }
+      .map-panel {
+        pointer-events: auto;
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        background: rgba(12, 12, 16, 0.88);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        width: 220px;
+        z-index: 1300;
+      }
+      .map-panel h4 {
+        margin: 0 0 12px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+      .map-panel label {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 14px;
+        font-size: 12px;
+        margin-bottom: 10px;
       }
-      .filters span {
-        transition: all 0.2s ease;
+      .map-panel input[type="text"] {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #0e0e14;
+        color: var(--text);
+      }
+      .map-panel span {
+        transition: 0.2s ease;
       }
       .opacity-40 {
         opacity: 0.4;
@@ -88,239 +363,931 @@
       .line-through {
         text-decoration: line-through;
       }
-      #map {
-        width: 100%;
-        height: 100%;
-        min-height: 520px;
-        background: radial-gradient(circle at top, #1a1b2b 0%, #0b0b12 55%, #070710 100%);
+      .legend {
+        pointer-events: auto;
+        position: absolute;
+        right: 18px;
+        top: 18px;
+        background: rgba(12, 12, 16, 0.88);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+        font-size: 12px;
+        z-index: 1300;
       }
-      .catalog-modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(4, 4, 10, 0.76);
+      .legend h4 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .dot.news {
+        background: #ff6b6b;
+      }
+      .dot.judicial {
+        background: #5aa5ff;
+      }
+      .dot.mixed {
+        background: #b873ff;
+      }
+      .geo-tag {
+        pointer-events: auto;
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+        background: rgba(12, 12, 16, 0.88);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: var(--accent);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        z-index: 1300;
+      }
+      .cards-header {
         display: none;
+      }
+      #catalog-grid,
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+      @media (max-width: 1200px) {
+        #catalog-grid,
+        .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 768px) {
+        #catalog-grid,
+        .cards-grid { grid-template-columns: 1fr; }
+      }
+      .card {
+        background: var(--panel-strong);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        min-height: 280px;
+      }
+      .card-thumb {
+        height: 120px;
+        background: linear-gradient(120deg, #1c1c25, #0b0b12);
+        background-size: cover;
+        background-position: center;
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px;
-        z-index: 2100;
+        font-size: 26px;
+        color: rgba(255, 255, 255, 0.35);
       }
-      .catalog-modal.open {
-        display: flex;
-      }
-      .catalog-card {
-        width: min(1100px, 92vw);
-        max-height: 88vh;
-        background: #101120;
-        border-radius: 16px;
-        border: 1px solid #262842;
-        padding: 24px;
+      .card-body {
+        padding: 14px 16px 16px;
         display: grid;
-        gap: 16px;
-        overflow: hidden;
+        gap: 8px;
       }
-      .catalog-header {
+      .card-meta {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--muted);
       }
-      .catalog-header h2 {
-        margin: 0;
-        font-size: 22px;
-      }
-      .catalog-controls {
-        display: flex;
-        gap: 12px;
-      }
-      .catalog-controls select {
-        background: #14162a;
-        color: #e6e7f2;
-        border: 1px solid #2a2d4a;
-        padding: 8px 12px;
-        border-radius: 8px;
-      }
-      #catalog-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-        overflow: auto;
-        padding-right: 8px;
-      }
-      .catalog-item {
-        padding: 12px;
-        border-radius: 12px;
-        border: 1px solid #2a2d4a;
-        background: #11131f;
-        cursor: pointer;
-        min-height: 120px;
-      }
-      .catalog-item h3 {
-        margin: 0 0 6px;
+      .card-title {
+        font-weight: 700;
         font-size: 14px;
-        color: #f7f7ff;
       }
-      .catalog-item p {
-        margin: 0;
+      .card-snippet {
         font-size: 12px;
-        color: #b4b6c7;
+        color: #c6c6d1;
+        min-height: 36px;
       }
-      .bg-blue-900\/10 {
-        background: rgba(30, 64, 175, 0.12);
-        border-color: rgba(59, 130, 246, 0.3);
+      .card-action {
+        margin-top: auto;
+        display: flex;
+        justify-content: flex-end;
       }
-      .bg-white\/5 {
-        background: rgba(255, 255, 255, 0.05);
+      .card-action button {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(12, 12, 18, 0.9);
+        color: var(--text);
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 12px;
       }
       #modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(3, 3, 10, 0.78);
+        background: rgba(2, 2, 6, 0.86);
         display: none;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         z-index: 2400;
-        padding: 24px;
+        padding: 20px 24px 24px;
       }
       #modal-overlay.open {
         display: flex;
       }
       .modal-card {
-        background: #0f1122;
-        border: 1px solid #2a2d4a;
+        background: rgba(12, 12, 18, 0.98);
+        border: 1px solid var(--border);
         border-radius: 14px;
-        padding: 20px;
-        width: min(720px, 92vw);
-      }
-      .modal-card h3 {
-        margin: 0 0 8px;
-      }
-      .meta {
+        padding: 22px;
+        width: min(760px, 92vw);
+        position: absolute;
         display: grid;
-        gap: 6px;
-        color: #b9bbce;
-        font-size: 13px;
+        gap: 14px;
       }
-      @media (max-width: 860px) {
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .modal-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-actions button {
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: rgba(12, 12, 18, 0.9);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .modal-id {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .detail-link {
+        color: #9db8ff;
+        text-decoration: none;
+      }
+      .detail-link:hover {
+        text-decoration: underline;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      .detail-box {
+        background: rgba(17, 17, 26, 0.96);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 12px;
+        color: #d0d0da;
+      }
+      .detail-box strong {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .form-error {
+        margin-top: 8px;
+        color: #ff9a9a;
+        font-size: 12px;
+      }
+      .marker {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid #11121a;
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.3);
+      }
+      .marker.news {
+        background: #ff6b6b;
+      }
+      .marker.judicial {
+        background: #5aa5ff;
+      }
+      .marker.mixed {
+        background: #b873ff;
+      }
+      .map-fullscreen header,
+      .map-fullscreen .layout {
+        display: none;
+      }
+      .map-fullscreen .map-shell {
+        position: fixed;
+        inset: 0;
+        margin: 0;
+        border-radius: 0;
+        z-index: 3000;
+        min-height: 100vh;
+      }
+      .map-close {
+        pointer-events: auto;
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        background: rgba(16, 16, 22, 0.94);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 3400;
+      }
+      @media (max-width: 960px) {
         .layout {
           grid-template-columns: 1fr;
         }
-        .sidebar {
-          border-right: 0;
-          border-bottom: 1px solid #1f2030;
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
         }
-        #map {
-          min-height: 420px;
+        .top-actions {
+          flex-wrap: wrap;
         }
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>JuriPopular</h1>
-      <p>Expondo o que a justiça esconde</p>
-    </header>
-    <main class="layout">
-      <aside class="sidebar">
-        <div class="actions">
-          <button onclick="openCatalog()">CATÁLOGO DE NOTÍCIAS</button>
-          <button class="secondary" onclick="openCatalog()">CATÁLOGO</button>
-        </div>
-        <h2>Filtros de Mapa</h2>
-        <div class="filters">
-          <label>
-            <input id="layer-news" type="checkbox" checked />
-            <span>MÍDIA / NOTÍCIAS</span>
-          </label>
-          <label>
-            <input id="layer-judicial" type="checkbox" checked />
-            <span>PROCESSOS JUDICIAIS</span>
-          </label>
-        </div>
-      </aside>
-      <section id="map"></section>
-    </main>
-    <div id="catalog-view" class="catalog-modal" aria-hidden="true">
-      <div class="catalog-card">
-        <div class="catalog-header">
-          <h2>CATÁLOGO DE INTELIGÊNCIA</h2>
-          <div class="catalog-controls">
-            <select id="filter-type">
-              <option value="all">Todos</option>
-              <option value="judicial">Judicial</option>
-              <option value="news">Notícias</option>
-            </select>
-            <button class="secondary" onclick="closeCatalog()">Fechar</button>
+    <div class="app">
+      <header>
+        <div class="brand">
+          <img class="brand-logo" src="/static/img/background.png" alt="JuriPopular" />
+          <div>
+            <h1>JuriPopular</h1>
+            <span>Expondo o que a justiça esconde</span>
           </div>
         </div>
-        <div id="catalog-grid"></div>
+        <div class="top-actions">
+          <button class="btn primary" id="open-map">VER NO MAPA</button>
+          <button class="btn" id="open-catalog">Catálogo</button>
+          <div class="session">ID_SESSÃO: <span id="session-id"></span></div>
+        </div>
+      </header>
+      <main class="layout">
+        <div class="main-content">
+          <section id="map-view" class="view-section active">
+            <div class="map-shell">
+              <div id="map"></div>
+              <div class="map-panel">
+                <h4>Camadas de Inteligência</h4>
+                <label>
+                  <input id="layer-news" type="checkbox" checked />
+                  <span>MÍDIA / NOTÍCIAS</span>
+                </label>
+                <label>
+                  <input id="layer-judicial" type="checkbox" checked />
+                  <span>JUDICIAL / TRIBUNAIS</span>
+                </label>
+                <input id="map-term" type="text" placeholder="Filtrar por Crime..." />
+              </div>
+              <div class="legend">
+                <h4>Legenda</h4>
+                <div class="legend-item"><span class="dot judicial"></span>Judicial</div>
+                <div class="legend-item"><span class="dot news"></span>Notícias</div>
+                <div class="legend-item"><span class="dot mixed"></span>Misto</div>
+              </div>
+              <div class="geo-tag">Inteligência Geo</div>
+            </div>
+          </section>
+
+          <section id="catalog-view" class="view-section">
+            <div class="catalog-toolbar">
+              <h2>Catálogo de Inteligência</h2>
+              <select id="filter-state" style="width: 80px;">
+                <option value="">UF</option>
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE">PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+              </select>
+              <div style="position: relative;">
+                <select id="filter-city" style="min-width: 160px;" disabled>
+                  <option value="">Cidade</option>
+                </select>
+                <div id="city-loader" style="display:none; position:absolute; right:10px; top:10px; width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
+              </div>
+              <select id="filter-type">
+                <option value="all">Todos</option>
+                <option value="judicial">Judicial</option>
+                <option value="news">Notícias</option>
+              </select>
+              <input id="filter-term" type="text" placeholder="Buscar..." style="flex:1">
+              <button id="btn-filter">Filtrar</button>
+              <div style="border-left: 1px solid var(--border); margin: 0 8px; height: 24px;"></div>
+              <select id="filter-limit" style="width: 70px;" title="Itens por página">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30" selected>30</option>
+              </select>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button id="btn-prev-page" disabled style="padding: 8px 12px;">&lt;</button>
+                <span id="page-indicator" style="font-size: 13px; min-width: 70px; text-align: center;">Página 1</span>
+                <button id="btn-next-page" style="padding: 8px 12px;">&gt;</button>
+              </div>
+            </div>
+            <div id="catalog-error" class="form-error" role="alert" style="display:none;"></div>
+            <div id="catalog-grid" class="cards-grid"></div>
+          </section>
+        </div>
+
+        <aside class="side-panel">
+          <div class="panel-box">
+            <h3>Buscar por processos</h3>
+            <div class="search-field">
+              <input id="process-query" type="text" placeholder="8933407-11.2016.8.14.4071" />
+              <button id="process-search">🔎</button>
+            </div>
+            <div id="process-error" class="form-error" role="alert" style="display:none;"></div>
+            <div class="kpi-list kpi-sample">
+              <div>Ex: 1 Jane Doe</div>
+              <div>Ex: 2 2407408-69.2024.8.11.3117</div>
+            </div>
+          </div>
+          <div class="panel-box">
+            <h3>KPIs de Inteligência</h3>
+            <div class="kpi-list" id="kpi-cities"></div>
+          </div>
+          <div class="panel-box">
+            <h3>Estados com maior volume</h3>
+            <div class="kpi-list" id="kpi-states"></div>
+          </div>
+        </aside>
+      </main>
+
+      <div id="modal-overlay" aria-hidden="true">
+        <div class="modal-card" id="modal-content"></div>
+      </div>
+      <div class="loader-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Buscando informações...</div>
       </div>
     </div>
-    <div id="modal-overlay" aria-hidden="true">
-      <div class="modal-card" id="modal-content"></div>
-    </div>
+    <script src="/static/vendor/leaflet/leaflet.js"></script>
     <script>
+      const sessionId = `SES-${Math.random().toString(36).slice(2, 10).toUpperCase()}`
+      document.getElementById("session-id").textContent = sessionId
+
+      // View Sections
+      const mapView = document.getElementById("map-view")
       const catalogView = document.getElementById("catalog-view")
+      
+      // Catalog Elements
       const catalogGrid = document.getElementById("catalog-grid")
+      const filterState = document.getElementById("filter-state")
+      const filterCity = document.getElementById("filter-city")
+      const cityLoader = document.getElementById("city-loader")
       const filterType = document.getElementById("filter-type")
+      const filterTerm = document.getElementById("filter-term")
+      const btnFilter = document.getElementById("btn-filter")
+      const catalogError = document.getElementById("catalog-error")
+
+      // Pagination Elements
+      const filterLimit = document.getElementById("filter-limit")
+      const btnPrevPage = document.getElementById("btn-prev-page")
+      const btnNextPage = document.getElementById("btn-next-page")
+      const pageIndicator = document.getElementById("page-indicator")
+      
+      let currentPage = 1
+
+      // Map Elements
+      const mapTerm = document.getElementById("map-term")
+      
+      // KPI Elements
+      const kpiCities = document.getElementById("kpi-cities")
+      const kpiStates = document.getElementById("kpi-states")
+      const processQuery = document.getElementById("process-query")
+      const processSearch = document.getElementById("process-search")
+      const processError = document.getElementById("process-error")
+
+      // Overlay Elements
       const modalOverlay = document.getElementById("modal-overlay")
       const modalContent = document.getElementById("modal-content")
+      const loaderOverlay = document.querySelector(".loader-overlay")
+      const loadingText = document.querySelector(".loading-text")
 
-      function openCatalog() {
-        catalogView.classList.add("open")
-        catalogView.setAttribute("aria-hidden", "false")
-        fetchCatalog()
+      let mapInstance = null
+      let layerNews = null
+      let layerJudicial = null
+      let layerMixed = null
+      let latestCatalog = []
+
+      // --- View Navigation ---
+      function switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'))
+        document.getElementById(`${viewName}-view`).classList.add('active')
+        
+        // Update Buttons State (Optional visual feedback)
+        document.getElementById("open-map").classList.toggle("primary", viewName === 'map')
+        document.getElementById("open-catalog").classList.toggle("primary", viewName === 'catalog')
+
+        if (viewName === 'map') {
+            setTimeout(() => {
+                if (mapInstance) mapInstance.invalidateSize()
+            }, 100)
+        }
       }
 
-      function closeCatalog() {
-        catalogView.classList.remove("open")
-        catalogView.setAttribute("aria-hidden", "true")
+      // --- Loading State ---
+      function setLoadingText(message) {
+        if (!loadingText) return
+        loadingText.textContent = message || "Buscando informações..."
       }
 
+      function toggleLoading(show, message) {
+        if (show) {
+          setLoadingText(message)
+          loaderOverlay.classList.add("visible")
+        } else {
+          loaderOverlay.classList.remove("visible")
+        }
+      }
+
+      function setError(el, message) {
+        if (!el) return
+        el.textContent = message || ""
+        el.style.display = message ? "block" : "none"
+      }
+
+      function normalizeTerm(value) {
+        if (!value) return ""
+        const base = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        const cleaned = base.replace(/[^a-zA-Z0-9.\-\/\s]/g, " ")
+        return cleaned.replace(/\s+/g, " ").trim()
+      }
+
+      function getCityCacheKey(uf) {
+        return `cities:${uf}`
+      }
+
+      function readCityCache(uf) {
+        try {
+          const raw = localStorage.getItem(getCityCacheKey(uf))
+          if (!raw) return null
+          const parsed = JSON.parse(raw)
+          if (!parsed || !Array.isArray(parsed.cities)) return null
+          if (Date.now() - parsed.ts > 24 * 60 * 60 * 1000) return null
+          return parsed.cities
+        } catch (e) {
+          return null
+        }
+      }
+
+      function writeCityCache(uf, cities) {
+        try {
+          localStorage.setItem(getCityCacheKey(uf), JSON.stringify({ ts: Date.now(), cities }))
+        } catch (e) {}
+      }
+
+      // --- Modal Logic ---
       function closeModal() {
         modalOverlay.classList.remove("open")
         modalOverlay.setAttribute("aria-hidden", "true")
       }
 
-      function openModal(item) {
+      async function copyProcessId(value) {
+        if (!value || value === "-") return
+        try {
+          await navigator.clipboard.writeText(value)
+        } catch (error) {
+          const temp = document.createElement("textarea")
+          temp.value = value
+          temp.style.position = "fixed"
+          temp.style.opacity = "0"
+          document.body.appendChild(temp)
+          temp.focus()
+          temp.select()
+          document.execCommand("copy")
+          document.body.removeChild(temp)
+        }
+      }
+
+      function positionModal(trigger) {
+        if (!trigger) return
+        const rect = trigger.getBoundingClientRect()
+        requestAnimationFrame(() => {
+          const modalRect = modalContent.getBoundingClientRect()
+          const padding = 20
+          const maxTop = Math.max(padding, window.innerHeight - modalRect.height - padding)
+          const maxLeft = Math.max(padding, window.innerWidth - modalRect.width - padding)
+          const top = Math.min(Math.max(rect.top, padding), maxTop)
+          const left = Math.min(Math.max(rect.left, padding), maxLeft)
+          modalContent.style.top = `${top}px`
+          modalContent.style.left = `${left}px`
+        })
+      }
+
+      function openModal(item, trigger) {
+        const parties = Array.isArray(item.partes) ? item.partes : []
+        const autor = parties.find((p) => String(p.tipo || "").toLowerCase().includes("autor"))
+        const reu = parties.find((p) => String(p.tipo || "").toLowerCase().includes("réu") || String(p.tipo || "").toLowerCase().includes("reu"))
+        const processNumber = item.processo || item.numero_processo || item.id || "-"
+        const tribunal = item.tribunal || item.source || "Tribunal de Justiça"
+        const cityState = `${item.city || "Nacional"} ${item.state || ""}`.trim()
+        const geoQuery = [item.vara, item.foro, item.city, item.state].filter(Boolean).join(" ")
+        const geoLink = geoQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoQuery)}` : ""
+        
+        const detailBlocks = [
+          { label: "Assunto", value: item.assunto || item.snippet || "-" },
+          { label: "Vara", value: item.vara || item.foro || "-" },
+          { label: "Envolvidos", value: `Autor: ${autor?.nome || "-"} | Réu: ${reu?.nome || "-"}` },
+          { label: "Geolocalização", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">${cityState || "Abrir mapa"}</a>` : cityState || "-" },
+          { label: "Classe", value: item.classe || item.title || "-" },
+          { label: "Processo", value: processNumber }
+        ]
+
         modalContent.innerHTML = `
-          <h3>${item.title || "Detalhes"}</h3>
-          <div class="meta">
-            <div><strong>Tipo:</strong> ${item.type}</div>
-            <div><strong>Fonte:</strong> ${item.source || "-"}</div>
-            <div><strong>Cidade/UF:</strong> ${item.city || "N/A"} ${item.state || ""}</div>
-            <div><strong>Resumo:</strong> ${item.snippet || "-"}</div>
+          <div class="modal-header">
+            <div class="modal-title">${item.title || item.classe || "Ação Penal"}</div>
+            <div class="modal-actions">
+              <span class="tag">${tribunal}</span>
+              <button type="button" id="modal-close">Fechar</button>
+            </div>
           </div>
+          <div class="modal-id">
+            <span class="tag">ID: ${processNumber}</span>
+            <button type="button" id="copy-process">Copiar ID</button>
+          </div>
+          <div class="detail-grid">
+            ${detailBlocks.map(block => `
+                <div class="detail-box">
+                  <strong>${block.label}</strong>
+                  <div>${block.value}</div>
+                </div>`).join("")}
+          </div>
+          ${item.url ? `<div class="detail-box"><strong>Fonte</strong><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.url}</a></div>` : ""}
         `
+        
+        modalContent.querySelector("#modal-close").addEventListener("click", closeModal)
+        modalContent.querySelector("#copy-process").addEventListener("click", () => copyProcessId(processNumber))
+        
         modalOverlay.classList.add("open")
         modalOverlay.setAttribute("aria-hidden", "false")
+        positionModal(trigger)
+      }
+
+      // --- Catalog Rendering ---
+      function mapSearchPayload(payload) {
+        const items = []
+        const results = Array.isArray(payload?.results) ? payload.results : []
+        const news = Array.isArray(payload?.news) ? payload.news : []
+        results.forEach((item) => {
+          items.push({ ...item, type: "judicial" })
+        })
+        news.forEach((item) => {
+          items.push({ ...item, type: "news" })
+        })
+        return items
+      }
+
+      function applySearchResults(payload) {
+        const items = mapSearchPayload(payload)
+        const uniqueItems = dedupeItems(items)
+        latestCatalog = uniqueItems
+        renderCatalog(uniqueItems)
+        return uniqueItems.length
+      }
+
+      function normalizeKeyPart(value) {
+        return String(value || "").trim().toLowerCase()
+      }
+
+      function normalizeUrl(value) {
+        const raw = String(value || "").trim()
+        if (!raw) return ""
+        try {
+          const parsed = new URL(raw)
+          const params = new URLSearchParams(parsed.search)
+          Array.from(params.keys()).forEach((key) => {
+            const lower = key.toLowerCase()
+            if (lower.startsWith("utm_") || ["gclid", "fbclid", "igshid", "mc_cid", "mc_eid"].includes(lower)) {
+              params.delete(key)
+            }
+          })
+          parsed.search = params.toString()
+          const normalized = `${parsed.origin}${parsed.pathname}`.replace(/\/$/, "")
+          return parsed.search ? `${normalized}?${parsed.search}`.toLowerCase() : normalized.toLowerCase()
+        } catch (e) {
+          return raw.toLowerCase()
+        }
+      }
+
+      function getItemKey(item) {
+        const type = item.type || (item.url ? "news" : "judicial")
+        if (type === "news") {
+          const url = normalizeUrl(item.url)
+          if (url) return `news:${url}`
+          const title = normalizeKeyPart(item.title)
+          const source = normalizeKeyPart(item.source)
+          const date = normalizeKeyPart(item.published_date)
+          return `news:${title}|${source}|${date}`
+        }
+        const rawProcess = item.processo || item.numero_processo || item.id
+        const processKey = String(rawProcess || "").replace(/\D/g, "")
+        const title = normalizeKeyPart(item.title || item.classe)
+        const source = normalizeKeyPart(item.source || item.tribunal)
+        const snippet = normalizeKeyPart(item.snippet || item.assunto)
+        if (processKey) {
+          const visualKey = `judicial:${title}|${source}|${snippet}`
+          return visualKey
+        }
+        return `judicial:${title}|${source}|${snippet}`
+      }
+
+      function dedupeItems(items) {
+        const seen = new Set()
+        const uniqueItems = []
+        items.forEach((item) => {
+          const key = getItemKey(item)
+          if (seen.has(key)) return
+          seen.add(key)
+          uniqueItems.push(item)
+        })
+        return uniqueItems
       }
 
       function renderCatalog(items) {
+        const uniqueItems = dedupeItems(items)
         catalogGrid.innerHTML = ""
-        items.forEach((item) => {
+        if (uniqueItems.length === 0) {
+            catalogGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">Nenhum registro encontrado para os filtros selecionados.</div>`
+            return
+        }
+
+        uniqueItems.forEach((item) => {
           const card = document.createElement("div")
-          const isJudicial = item.type === "judicial"
-          card.className = `catalog-item ${isJudicial ? "bg-blue-900/10" : "bg-white/5"}`
+          card.className = "card"
+          const isNews = item.type === "news"
+          const thumbStyle = item.image_url ? `style="background-image:url('${item.image_url}')"` : ""
+          
           card.innerHTML = `
-            <h3>${isJudicial ? "⚖️" : "📰"} ${item.title || "Sem título"}</h3>
-            <p>${item.snippet || "Sem descrição disponível"}</p>
+            <div class="card-thumb" ${thumbStyle}>${isNews ? "📰" : "⚖️"}</div>
+            <div class="card-body">
+              <div class="card-meta">
+                <span>${item.source || item.tribunal || "TJ"}</span>
+                <span>${item.city || "Nacional"} ${item.state || ""}</span>
+              </div>
+              <div class="card-title">${item.title || item.classe || "Processo Judicial"}</div>
+              <div class="card-snippet">${item.snippet || item.assunto || "Sem descrição"}</div>
+              <div class="card-action">
+                <button type="button">VER MAIS</button>
+              </div>
+            </div>
           `
-          card.addEventListener("click", () => openModal(item))
+          card.addEventListener("click", () => openModal(item, card))
+          card.querySelector("button").addEventListener("click", (e) => {
+            e.stopPropagation()
+            openModal(item, card)
+          })
           catalogGrid.appendChild(card)
         })
       }
 
-      async function fetchCatalog() {
-        const sourceType = filterType.value
-        const response = await fetch(`/api/v1/search/catalog?source_type=${sourceType}&limit=50`)
-        if (!response.ok) {
-          renderCatalog([])
-          return
+      // --- Data Fetching ---
+      async function fetchCatalogData() {
+        toggleLoading(true)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
+
+        try {
+            setError(catalogError, "")
+            const sourceType = filterType.value
+            const rawTerm = filterTerm.value.trim()
+            const term = normalizeTerm(rawTerm)
+            const state = filterState.value
+            const city = filterCity.value
+            const limit = filterLimit.value
+
+            if (rawTerm && term.length < 2) {
+                setError(catalogError, "Informe ao menos 2 caracteres para buscar.")
+                return
+            }
+            if (rawTerm && term !== rawTerm) {
+                setError(catalogError, "Caracteres inválidos foram removidos da busca.")
+            }
+            
+            const params = new URLSearchParams({ 
+                source_type: sourceType, 
+                limit: limit,
+                page: currentPage.toString()
+            })
+            if (term) params.append("term", term)
+            if (state) params.append("state", state)
+            if (city) params.append("city", city)
+            
+            const response = await fetch(`/api/v1/search/catalog?${params.toString()}`, {
+                signal: controller.signal
+            })
+            if (!response.ok) throw new Error("Erro na busca")
+            
+            const data = await response.json()
+            const items = Array.isArray(data) ? data : []
+            const uniqueItems = dedupeItems(items)
+            
+            latestCatalog = uniqueItems
+            renderCatalog(uniqueItems)
+
+            // Pagination UI update
+            pageIndicator.textContent = `Página ${currentPage}`
+            btnPrevPage.disabled = currentPage <= 1
+            // Se o número de itens retornados (após deduplicação) for menor que o limite solicitado,
+            // ou se for 0, provavelmente chegamos ao fim.
+            // O backend retorna um multiplicador (5x), então items.length pode ser maior que limit.
+            // Mas uniqueItems.length é o que importa para o usuário.
+            // Se uniqueItems for 0, com certeza não tem mais nada para mostrar (nessa página).
+            // Vamos desabilitar o botão Next se uniqueItems for 0.
+            if (uniqueItems.length === 0) {
+                 btnNextPage.disabled = true
+            } else {
+                 btnNextPage.disabled = false
+            }
+
+        } catch (err) {
+            console.error(err)
+            if (err.name === 'AbortError') {
+                setError(catalogError, "A busca demorou muito. Refine os filtros e tente novamente.")
+            } else {
+                setError(catalogError, "Erro ao buscar. Tente novamente.")
+            }
+            renderCatalog([])
+        } finally {
+            clearTimeout(timeoutId)
+            toggleLoading(false)
         }
-        const data = await response.json()
-        renderCatalog(Array.isArray(data) ? data : [])
       }
 
+      async function populateCities(uf) {
+        setError(catalogError, "")
+        if (!uf) {
+            filterCity.innerHTML = '<option value="">Cidade</option>'
+            filterCity.disabled = true
+            return
+        }
+        const cached = readCityCache(uf)
+        if (cached) {
+            filterCity.innerHTML = '<option value="">Todas as Cidades</option>'
+            cached.forEach(city => {
+                const opt = document.createElement("option")
+                opt.value = city
+                opt.textContent = city
+                filterCity.appendChild(opt)
+            })
+            filterCity.disabled = false
+            return
+        }
+        
+        const loader = document.getElementById("city-loader")
+        if(loader) loader.style.display = "block"
+        filterCity.disabled = true
+        
+        try {
+            let res = await fetch(`/api/v1/search/cities?uf=${uf}`)
+            if (!res.ok) {
+              res = await fetch(`/api/v1/stats/ufs/${uf}/cities`)
+            }
+            if(!res.ok) throw new Error("Erro ao carregar cidades")
+            const cities = await res.json()
+            
+            filterCity.innerHTML = '<option value="">Todas as Cidades</option>'
+            cities.forEach(city => {
+                const opt = document.createElement("option")
+                opt.value = city
+                opt.textContent = city
+                filterCity.appendChild(opt)
+            })
+            filterCity.disabled = false
+            writeCityCache(uf, cities)
+        } catch (e) {
+            console.error(e)
+            filterCity.innerHTML = '<option value="">Erro ao carregar</option>'
+        } finally {
+            if(loader) loader.style.display = "none"
+        }
+      }
+
+      async function fetchKpis() {
+        const term = mapTerm.value.trim()
+        const params = new URLSearchParams({ limit: "5" })
+        if (term) params.append("term", term)
+        
+        try {
+            const response = await fetch(`/api/v1/stats/kpi?${params.toString()}`)
+            if (!response.ok) return
+            const data = await response.json()
+            
+            kpiCities.innerHTML = ""
+            kpiStates.innerHTML = ""
+            
+            ;(data.top_cities_overall || []).forEach((item) => {
+              const div = document.createElement("div")
+              div.className = "kpi-item"
+              div.innerHTML = `<span>${item.name}</span><strong>${item.value}</strong>`
+              kpiCities.appendChild(div)
+            })
+            ;(data.top_states_overall || []).forEach((item) => {
+              const div = document.createElement("div")
+              div.className = "kpi-item"
+              div.innerHTML = `<span>${item.name}</span><strong>${item.value}</strong>`
+              kpiStates.appendChild(div)
+            })
+        } catch (e) { console.error(e) }
+      }
+
+      // --- Map Logic ---
+      function ensureMap() {
+        if (mapInstance) return
+        mapInstance = L.map("map", { 
+            zoomControl: true,
+            minZoom: 3,
+            maxBounds: [[-45, -90], [10, -20]] // Limites da América do Sul
+        }).setView([-14.235, -51.9253], 4)
+        
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+        }).addTo(mapInstance)
+        layerNews = L.layerGroup().addTo(mapInstance)
+        layerJudicial = L.layerGroup().addTo(mapInstance)
+        layerMixed = L.layerGroup().addTo(mapInstance)
+      }
+
+      function markerIcon(type) {
+        return L.divIcon({
+          className: "",
+          html: `<div class="marker ${type}"></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        })
+      }
+
+      function syncLayers() {
+        const showNews = document.getElementById("layer-news").checked
+        const showJudicial = document.getElementById("layer-judicial").checked
+        if (showNews) mapInstance.addLayer(layerNews)
+        else mapInstance.removeLayer(layerNews)
+        if (showJudicial) mapInstance.addLayer(layerJudicial)
+        else mapInstance.removeLayer(layerJudicial)
+        if (showNews && showJudicial) mapInstance.addLayer(layerMixed)
+        else mapInstance.removeLayer(layerMixed)
+      }
+      
       function syncLayerLabel(inputId) {
         const input = document.getElementById(inputId)
         const label = input.closest("label").querySelector("span")
@@ -331,21 +1298,190 @@
         }
       }
 
-      document.getElementById("layer-news").addEventListener("change", () => syncLayerLabel("layer-news"))
-      document.getElementById("layer-judicial").addEventListener("change", () => syncLayerLabel("layer-judicial"))
-      filterType.addEventListener("change", fetchCatalog)
-      modalOverlay.addEventListener("click", closeModal)
+      async function fetchGeo() {
+        ensureMap()
+        layerNews.clearLayers()
+        layerJudicial.clearLayers()
+        layerMixed.clearLayers()
+        const term = mapTerm.value.trim()
+        const params = new URLSearchParams()
+        if (term) params.append("term", term)
+        
+        try {
+            const response = await fetch(`/api/v1/stats/geo?${params.toString()}`)
+            if (!response.ok) return
+            const data = await response.json()
+            
+            data.forEach((point) => {
+              if (!point.lat || !point.lng) return
+              const type = point.type || "news"
+              const marker = L.marker([point.lat, point.lng], { icon: markerIcon(type) })
+              marker.bindPopup(`
+                <div style="font-size:12px;">
+                  <strong>${point.city} (${point.state})</strong><br/>
+                  ${point.count} Ocorrências<br/>
+                  ${type === "news" ? "Mídia/Imprensa" : type === "judicial" ? "Judicial" : "Misto"}
+                  <div style="margin-top:8px;">
+                    <button onclick="window.filterByRegion('${point.city}','${point.state}')" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:#1b1b24;color:#fff;cursor:pointer;">VER CASOS DESTA REGIÃO</button>
+                  </div>
+                </div>
+              `)
+              if (type === "news") layerNews.addLayer(marker)
+              else if (type === "judicial") layerJudicial.addLayer(marker)
+              else layerMixed.addLayer(marker)
+            })
+            syncLayers()
+        } catch(e) { console.error(e) }
+      }
 
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          closeModal()
-          closeCatalog()
+      window.filterByRegion = async (city, state) => {
+        filterState.value = state
+        await populateCities(state)
+        filterCity.value = city
+        switchView('catalog')
+        await fetchCatalogData()
+      }
+
+      // --- Event Listeners ---
+      document.getElementById("open-map").addEventListener("click", () => switchView('map'))
+      document.getElementById("open-catalog").addEventListener("click", () => switchView('catalog'))
+
+      btnFilter.addEventListener("click", () => {
+          currentPage = 1
+          fetchCatalogData()
+      })
+      
+      filterLimit.addEventListener("change", () => {
+          currentPage = 1
+          fetchCatalogData()
+      })
+      
+      btnPrevPage.addEventListener("click", () => {
+          if (currentPage > 1) {
+              currentPage--
+              fetchCatalogData()
+          }
+      })
+      
+      btnNextPage.addEventListener("click", () => {
+          currentPage++
+          fetchCatalogData()
+      })
+      
+      filterType.addEventListener("change", () => {
+          currentPage = 1
+          fetchCatalogData()
+      })
+      
+      filterState.addEventListener("change", async () => {
+        currentPage = 1
+        await populateCities(filterState.value)
+        fetchCatalogData()
+      })
+      
+      filterCity.addEventListener("change", () => {
+          currentPage = 1
+          fetchCatalogData()
+      })
+
+      filterTerm.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+              currentPage = 1
+              fetchCatalogData()
+          }
+      })
+      filterTerm.addEventListener("input", () => setError(catalogError, ""))
+
+      document.getElementById("layer-news").addEventListener("change", () => {
+        syncLayerLabel("layer-news")
+        syncLayers()
+      })
+      document.getElementById("layer-judicial").addEventListener("change", () => {
+        syncLayerLabel("layer-judicial")
+        syncLayers()
+      })
+
+      processQuery.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") processSearch.click()
+      })
+      processQuery.addEventListener("input", () => setError(processError, ""))
+
+      processSearch.addEventListener("click", async () => {
+        const rawValue = processQuery.value.trim()
+        const value = normalizeTerm(rawValue)
+        if (!rawValue) {
+          setError(processError, "Informe um número de processo ou termo válido.")
+          return
+        }
+        if (value.length < 3) {
+          setError(processError, "Informe pelo menos 3 caracteres.")
+          return
+        }
+        if (rawValue !== value) {
+          setError(processError, "Caracteres inválidos foram removidos da consulta.")
+        } else {
+          setError(processError, "")
+        }
+        
+        toggleLoading(true, "Estamos buscando em nossa base, aguarde só mais um momento.")
+        try {
+            let localData = null
+            try {
+              const localResponse = await fetch(`/api/v1/search/local?query=${encodeURIComponent(value)}`)
+              if (localResponse.ok) {
+                localData = await localResponse.json()
+              }
+            } catch (e) {}
+
+            if (localData) {
+              const localCount = applySearchResults(localData)
+              if (localCount > 0) {
+                await fetchKpis()
+                await fetchGeo()
+                switchView('catalog')
+                return
+              }
+            }
+
+            setLoadingText("Não temos esse processo ainda, vamos buscar externo.")
+            const response = await fetch(`/api/v1/search?query=${encodeURIComponent(value)}`)
+            if (!response.ok) throw new Error("Erro na busca")
+
+            const data = await response.json()
+            const totalCount = applySearchResults(data)
+            if (totalCount === 0) {
+              setError(processError, "Nenhum resultado encontrado.")
+            }
+            await fetchKpis()
+            await fetchGeo()
+            switchView('catalog')
+        } catch (e) {
+            console.error(e)
+            setError(processError, "Erro ao realizar busca. Tente novamente.")
+        } finally {
+            toggleLoading(false)
         }
       })
 
+      mapTerm.addEventListener("change", () => {
+        fetchGeo()
+        fetchKpis()
+      })
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeModal()
+      })
+
+      // --- Init ---
       syncLayerLabel("layer-news")
       syncLayerLabel("layer-judicial")
-      window.addEventListener("load", openCatalog)
+      
+      window.addEventListener("load", async () => {
+        ensureMap()
+        await fetchGeo()
+        await fetchKpis()
+        await fetchCatalogData()
+      })
     </script>
   </body>
 </html>

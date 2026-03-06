@@ -10,6 +10,8 @@ import json
 import unicodedata
 import re
 from datetime import datetime
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+import requests
 
 router = APIRouter()
 
@@ -37,6 +39,21 @@ RELEVANT_KEYWORDS = [
     "VIOLENCIA SEXUAL CONTRA MULHER",
     "VIOLENCIA SEXUAL CONTRA MULHERES"
 ]
+
+def normalize_url(value: str) -> str:
+    if not value:
+        return ""
+    try:
+        parts = urlsplit(value.strip())
+        query_items = [
+            (k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+            if not k.lower().startswith("utm_") and k.lower() not in {"gclid", "fbclid", "igshid", "mc_cid", "mc_eid"}
+        ]
+        query = urlencode(query_items, doseq=True)
+        path = parts.path.rstrip("/")
+        return urlunsplit((parts.scheme, parts.netloc, path, query, "")).lower()
+    except Exception:
+        return value.strip().lower()
 
 def normalize_text(value: str) -> str:
     if not value:
@@ -119,6 +136,62 @@ def search_local_db(query: str, client: Any) -> dict:
         print(f"Error searching results in Supabase: {e}")
 
     return local_results
+
+@router.get("/local")
+def search_local_only(query: str, client: Any = Depends(get_supabase)):
+    if not query:
+        raise HTTPException(status_code=400, detail="Query parameter is required")
+    local_data = search_local_db(query, client)
+    return {
+        "results": local_data.get("results", []),
+        "news": local_data.get("news", []),
+        "status": "local"
+    }
+
+@router.get("/cities")
+def get_cities(uf: str, client: Any = Depends(get_supabase)):
+    """
+    Retorna lista de cidades disponíveis para uma UF.
+    """
+    if not uf:
+        return []
+    
+    uf = uf.upper()
+    cities = set()
+    
+    try:
+        resp = client.table("news").select("city").eq("state", uf).execute()
+        for item in resp.data:
+            if item.get("city"):
+                cities.add(item["city"].upper().strip())
+    except Exception as e:
+        print(f"Error fetching cities from Supabase: {e}")
+
+    if not cities:
+        url = f"https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios?orderBy=nome"
+        try:
+            res = requests.get(url, timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                for item in data:
+                    name = item.get("nome")
+                    if name:
+                        cities.add(name.upper().strip())
+        except Exception as e:
+            print(f"Error fetching cities from IBGE: {e}")
+        
+    # Fallback para principais capitais se vazio (apenas para UX não quebrar)
+    if not cities:
+        capitais = {
+            "SP": ["SAO PAULO", "CAMPINAS", "SANTOS"],
+            "RJ": ["RIO DE JANEIRO", "NITEROI", "DUQUE DE CAXIAS"],
+            "MG": ["BELO HORIZONTE", "UBERLANDIA", "CONTAGEM"],
+            "MT": ["CUIABA", "VARZEA GRANDE", "RONDONOPOLIS"]
+        }
+        if uf in capitais:
+            cities.update(capitais[uf])
+            
+    return sorted(list(cities))
 
 @router.get("/")
 def search_process(query: str, client: Any = Depends(get_supabase)):
@@ -244,13 +317,21 @@ def search_process(query: str, client: Any = Depends(get_supabase)):
 
         if news_result.get("status") == "success" and search_record_id:
             for item in news_result.get("results", []):
-                # Check duplication using URL
-                exists = client.table("news").select("id").eq("url", item["url"]).execute()
-                if not exists.data:
-                    client.table("news").insert({
-                        "search_id": search_record_id,
-                        "title": item["title"],
-                        "url": item["url"],
+                # 1. Check URL duplication
+                dup_url = client.table("news").select("id").eq("url", item["url"]).execute()
+                if dup_url.data:
+                    continue
+                    
+                # 2. Check Title duplication (case-insensitive)
+                # This prevents same news from different sources
+                dup_title = client.table("news").select("id").ilike("title", item["title"]).execute()
+                if dup_title.data:
+                    continue
+
+                client.table("news").insert({
+                    "search_id": search_record_id,
+                    "title": item["title"],
+                    "url": item["url"],
                         "source": item["source"],
                         "snippet": item["snippet"],
                         "image_url": item["image_url"],
@@ -284,15 +365,40 @@ def search_process(query: str, client: Any = Depends(get_supabase)):
                 local_ids.add(pid)
             
     final_news = local_data["news"]
-    local_urls = {x.get("url") for x in final_news}
+    local_urls = {normalize_url(x.get("url")) for x in final_news}
     
     for item in news_result.get("results", []):
-        if item.get("url") not in local_urls:
+        if normalize_url(item.get("url")) not in local_urls:
             final_news.append(item)
 
+    seen_judicial = set()
+    unique_judicial = []
+    for item in final_judicial:
+        raw_process = item.get("processo") or item.get("numero_processo") or item.get("id")
+        process_key = re.sub(r"\D", "", str(raw_process or ""))
+        key = process_key or json.dumps(item, sort_keys=True, ensure_ascii=False)
+        if key in seen_judicial:
+            continue
+        seen_judicial.add(key)
+        unique_judicial.append(item)
+
+    seen_news = set()
+    unique_news = []
+    for item in final_news:
+        url = normalize_url(item.get("url") or "")
+        if not url:
+            title = (item.get("title") or "").strip().lower()
+            source = (item.get("source") or "").strip().lower()
+            published = str(item.get("published_date") or "").strip().lower()
+            url = f"{title}|{source}|{published}"
+        if url in seen_news:
+            continue
+        seen_news.add(url)
+        unique_news.append(item)
+
     final_response = {
-        "results": final_judicial,
-        "news": final_news,
+        "results": unique_judicial,
+        "news": unique_news,
         "status": "success",
         "tribunal": tribunal_name,
         "msg": rpa_result.get("msg")
@@ -302,14 +408,31 @@ def search_process(query: str, client: Any = Depends(get_supabase)):
 
 @router.delete("/clean")
 def clean_duplicates(client: Any = Depends(get_supabase)):
-    """
-    Remove notícias duplicadas baseadas na URL (Implementação simplificada para Supabase).
-    Supabase não suporta delete com subquery complexa facilmente via cliente simples.
-    Vamos fazer em memória ou via SQL direto se possível (mas não temos raw sql access).
-    """
-    # Esta operação é custosa via API. Melhor evitar ou fazer em batches pequenos.
-    # Vamos pular por enquanto ou implementar apenas um warning.
-    return {"message": "Operação não suportada via API direta para grandes volumes. Use SQL Editor no Supabase."}
+    news_resp = client.table("news").select("id,url,title,source,published_date,created_at").order("created_at", desc=True).limit(5000).execute()
+    news_items = news_resp.data or []
+    seen = set()
+    duplicate_ids = []
+    for item in news_items:
+        url_key = normalize_url(item.get("url") or "")
+        if not url_key:
+            title = (item.get("title") or "").strip().lower()
+            source = (item.get("source") or "").strip().lower()
+            published = (item.get("published_date") or "").strip().lower()
+            url_key = f"{title}|{source}|{published}"
+        if url_key in seen:
+            duplicate_ids.append(item.get("id"))
+        else:
+            seen.add(url_key)
+    removed = 0
+    if duplicate_ids:
+        chunk_size = 200
+        for i in range(0, len(duplicate_ids), chunk_size):
+            chunk = [cid for cid in duplicate_ids[i:i + chunk_size] if cid is not None]
+            if not chunk:
+                continue
+            client.table("news").delete().in_("id", chunk).execute()
+            removed += len(chunk)
+    return {"removed": removed, "scanned": len(news_items)}
 
 import logging
 logger = logging.getLogger("uvicorn.error")
@@ -414,7 +537,8 @@ def list_catalog(
     term: str = None,
     source_type: str = "all",
     type: str = None,
-    limit: int = 100,
+    limit: int = 30,
+    page: int = 1,
     client: Any = Depends(get_supabase)
 ):
     """
@@ -423,12 +547,22 @@ def list_catalog(
     final_source_type = source_type
     if type and type != "all":
         final_source_type = type
-        
+    
+    # Heuristic: Fetch more items from start to ensure correct interleaving and deduping
+    # This is necessary because we are merging two independent sorted lists (News + Judicial)
+    # and applying deduplication which changes the indices.
+    # For a robust pagination, we fetch from 0 up to (page * limit * safety_factor).
+    safety_factor = 4
+    fetch_limit = limit * page * safety_factor
+    # We always fetch from 0 to ensure we have the candidate pool for the current page
+    offset = 0
+
     results = []
     
     # 1. Buscar Notícias
     if final_source_type in ["all", "news"]:
-        query = client.table("news").select("*").order("created_at", desc=True).limit(limit * 5)
+        # Fetch from 0 to fetch_limit
+        query = client.table("news").select("*").order("created_at", desc=True).range(0, fetch_limit)
         
         if city:
             query = query.ilike("city", f"%{city}%")
@@ -480,12 +614,12 @@ def list_catalog(
     if final_source_type in ["all", "judicial"]:
         # Join é complexo via API client simples. Vamos buscar SearchResults recentes.
         try:
-            resp = client.table("search_result").select("*, search(tribunal)").order("created_at", desc=True).limit(limit * 5).execute()
+            resp = client.table("search_result").select("*, search(tribunal)").order("created_at", desc=True).range(0, fetch_limit).execute()
             judicial_items = resp.data
             
             count = 0
             for row in judicial_items:
-                if count >= limit: break
+                if count >= fetch_limit: break
                 
                 data = row.get("content")
                 if not data or "results" not in data: continue
@@ -499,7 +633,7 @@ def list_catalog(
                     base_state = TRIBUNAL_TO_STATE.get(clean_tribunal, "BR")
 
                 for item in data["results"]:
-                    if count >= limit: break
+                    if count >= fetch_limit: break
 
                     desc = item.get("descricao", "")
                     assunto = item.get("assunto", "")
@@ -557,4 +691,48 @@ def list_catalog(
             print(f"Error fetching catalog judicial: {e}")
 
     results.sort(key=lambda x: x["created_at"] or "", reverse=True)
-    return results[:limit]
+    def build_dedupe_key(item: dict) -> str:
+        item_type = item.get("type")
+        if item_type == "news":
+            url = normalize_url(item.get("url") or "")
+            if url:
+                return f"news:{url}"
+            title = (item.get("title") or "").strip().lower()
+            source = (item.get("source") or "").strip().lower()
+            published = str(item.get("published_date") or "").strip().lower()
+            return f"news:{title}|{source}|{published}"
+        raw_process = item.get("processo") or item.get("numero_processo") or item.get("id")
+        process_key = re.sub(r"\D", "", str(raw_process or ""))
+        if process_key:
+            return f"judicial:{process_key}"
+        title = (item.get("title") or "").strip().lower()
+        source = (item.get("source") or "").strip().lower()
+        return f"judicial:{title}|{source}"
+
+    unique_results = []
+    seen = set()
+    for item in results:
+        key = build_dedupe_key(item)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_results.append(item)
+    
+    # Passo adicional: colapsar duplicidade visual (mesmo card) para reduzir repetição
+    visual_seen = set()
+    final_results = []
+    for item in unique_results:
+        title = (item.get("title") or item.get("classe") or "").strip().lower()
+        source = (item.get("source") or "").strip().lower()
+        snippet = (item.get("snippet") or item.get("assunto") or "").strip().lower()
+        vkey = f"{item.get('type')}:{title}|{source}|{snippet}"
+        if vkey in visual_seen:
+            continue
+        visual_seen.add(vkey)
+        final_results.append(item)
+    
+    # Apply pagination slicing on the final merged and deduped list
+    start_idx = (page - 1) * limit
+    end_idx = start_idx + limit
+    
+    return final_results[start_idx:end_idx]

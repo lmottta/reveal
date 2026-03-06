@@ -123,7 +123,7 @@ def test_details_modal(page: Page):
         expect(page.locator("#modal-overlay")).to_be_visible()
         
         # Close details
-        page.keyboard.press("Escape")
+        page.click("#modal-close")
         expect(page.locator("#modal-overlay")).not_to_be_visible()
     else:
         pytest.skip("No items in catalog to test details")
