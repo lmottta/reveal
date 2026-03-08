@@ -1,4 +1,17 @@
 
+# Security & Secrets
+*.key
+*.pem
+*.p12
+*.crt
+*.csr
+secrets.json
+credentials.yaml
+credentials.json
+client_secret*.json
+security_scan_results.json
+.trae/skills/vulnerability-scanner/reports/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -37,6 +50,7 @@ venv.bak/
 .idea/
 *.swp
 *.swo
+.trae/mcp.json
 
 # Project specific
 backend/scan_log.txt
@@ -47,5 +61,20 @@ backend/scan_log.txt
 backend/static/img/Driver_Booster_v12.1.0.469.exe
 backend/static/img/driver_booster_setup.exe
 
-# Vercel
+# Deployment
 .vercel
+.railway/
+.trae/
+docs/
+
+# Testing & CI
+.testsprite/
+coverage/
+htmlcov/
+.pytest_cache/
+.coverage
+test-results/
+
+# Local scripts
+start_reveal.bat
+run_system.bat
