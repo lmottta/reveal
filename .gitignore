@@ -54,9 +54,9 @@ venv.bak/
 
 # Project specific
 backend/scan_log.txt
-*.png
-*.html
-!backend/static/index.html
+# *.png  <-- Removed to allow static assets
+# *.html <-- Removed to allow static assets
+# !backend/static/index.html
 *.log
 backend/static/img/Driver_Booster_v12.1.0.469.exe
 backend/static/img/driver_booster_setup.exe
