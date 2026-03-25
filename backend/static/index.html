@@ -655,8 +655,9 @@
           </div>
         </div>
         <div class="top-actions">
-          <button class="btn primary" id="open-map">VER NO MAPA</button>
+          <button class="btn primary" id="open-map">VER NO MAPA</button>    
           <button class="btn" id="open-catalog">Catálogo</button>
+          <button class="btn primary" id="open-analysis" style="background: linear-gradient(135deg, #1c1c26 0%, #14141d 60%, rgba(138, 43, 226, 0.2) 100%); border-color: rgba(138, 43, 226, 0.5);">Análise Profunda</button>
           <div class="session">ID_SESSÃO: <span id="session-id"></span></div>
         </div>
       </header>
@@ -684,6 +685,15 @@
                 <div class="legend-item"><span class="dot mixed"></span>Misto</div>
               </div>
               <div class="geo-tag">Inteligência Geo</div>
+            </div>
+          </section>
+
+          <section id="analysis-view" class="view-section">
+            <div class="panel-box">
+              <h2 style="margin-top: 0; color: #fff; font-family: 'Cinzel', serif;">Análise Profunda de Dados</h2>
+              <div id="analysis-content" style="white-space: pre-wrap; line-height: 1.6; font-size: 15px; color: var(--text);">
+                Carregando análise baseada nos dados atuais...
+              </div>
             </div>
           </section>
 
@@ -834,11 +844,12 @@
       // --- View Navigation ---
       function switchView(viewName) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'))
-        document.getElementById(`${viewName}-view`).classList.add('active')
-        
+        document.getElementById(`${viewName}-view`).classList.add('active') 
+
         // Update Buttons State (Optional visual feedback)
         document.getElementById("open-map").classList.toggle("primary", viewName === 'map')
         document.getElementById("open-catalog").classList.toggle("primary", viewName === 'catalog')
+        document.getElementById("open-analysis").classList.toggle("primary", viewName === 'analysis')
 
         if (viewName === 'map') {
             setTimeout(() => {
@@ -1103,6 +1114,47 @@
       }
 
       // --- Data Fetching ---
+      async function fetchAnalysisData() {
+        toggleLoading(true, "Gerando análise profunda...")
+        try {
+          const params = new URLSearchParams()
+          if (filterState.value) params.append("state", filterState.value)
+          if (filterCity.value) params.append("city", filterCity.value)
+          if (filterTerm.value) params.append("term", filterTerm.value)
+
+          const res = await fetch(`/api/v1/search/analyze?${params}`)
+          if (!res.ok) throw new Error("Erro ao buscar análise")
+          const data = await res.json()
+          
+          if (data.status === "success") {
+              // Convert markdown-like syntax to basic HTML
+              let htmlContent = data.analysis
+                  .replace(/#### (.*?)\n/g, '<h3>$1</h3>')
+                  .replace(/### (.*?)\n/g, '<h2>$1</h2>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/- (.*?)\n/g, '<li>$1</li>')
+                  .replace(/<\/li><li>/g, '</li>\n<li>')
+                  
+              // Wrap list items in ul
+              htmlContent = htmlContent.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+              
+              document.getElementById("analysis-content").innerHTML = `
+                  <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                      <strong>Resumo do Dataset:</strong> ${data.total_lawsuits} processos e ${data.total_news} notícias analisadas.
+                  </div>
+                  ${htmlContent}
+              `
+          } else {
+              document.getElementById("analysis-content").innerHTML = "Erro ao gerar análise."
+          }
+        } catch (err) {
+          console.error(err)
+          document.getElementById("analysis-content").innerHTML = "Erro de conexão ao buscar análise."
+        } finally {
+          toggleLoading(false)
+        }
+      }
+
       async function fetchCatalogData() {
         toggleLoading(true)
         const controller = new AbortController()
@@ -1346,6 +1398,10 @@
       // --- Event Listeners ---
       document.getElementById("open-map").addEventListener("click", () => switchView('map'))
       document.getElementById("open-catalog").addEventListener("click", () => switchView('catalog'))
+      document.getElementById("open-analysis").addEventListener("click", () => {
+          switchView('analysis')
+          fetchAnalysisData()
+      })
 
       btnFilter.addEventListener("click", () => {
           currentPage = 1
