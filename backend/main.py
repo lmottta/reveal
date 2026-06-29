@@ -2,9 +2,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from app.core.config import settings
 from app.api.api import api_router
-from app.middleware.auth import SupabaseAuthMiddleware
+from app.db.init_db import init_db
 import os
 
 app = FastAPI(
@@ -21,9 +22,10 @@ async def add_security_headers(request: Request, call_next):
     # Basic CSP for dev - adjust for prod
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
+        "connect-src *; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; "
         "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; "
-        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com; "
+        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com http://*.basemaps.cartocdn.com; "
         "font-src 'self' https://fonts.gstatic.com data:;"
     )
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
@@ -39,9 +41,11 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-app.add_middleware(SupabaseAuthMiddleware)
-
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 @app.get("/health")
 def health_check():
@@ -50,39 +54,31 @@ def health_check():
 @app.get("/diagnostics")
 def diagnostics():
     checks = {
+        "database_url": settings.DATABASE_URL,
         "playwright": False,
-        "supabase": False,
         "lxml": False,
-        "env_vars": {}
     }
-    
-    # Check Playwright
+
     try:
         from playwright.sync_api import sync_playwright
         checks["playwright"] = True
     except ImportError as e:
         checks["playwright_error"] = str(e)
-        
-    # Check Supabase
-    try:
-        from app.core.supabase import get_supabase
-        client = get_supabase()
-        checks["supabase"] = client is not None
-    except Exception as e:
-        checks["supabase_error"] = str(e)
 
-    # Check lxml
     try:
         import lxml
         checks["lxml"] = True
     except ImportError as e:
         checks["lxml_error"] = str(e)
 
-    # Check Env Vars (safe list)
-    safe_vars = ["SUPABASE_URL", "PROJECT_NAME", "API_V1_STR"]
-    for var in safe_vars:
-        checks["env_vars"][var] = bool(os.getenv(var))
-        
+    try:
+        from app.db.session import engine
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        checks["database"] = True
+    except Exception as e:
+        checks["database_error"] = str(e)
+
     return checks
 
 # Mount static files

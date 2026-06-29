@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy import or_, cast, String, text
 from sqlalchemy.orm import Session
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
@@ -6,12 +6,16 @@ from app.rpa.tjsp import TJSPRPA
 from app.rpa.tjmt import TJMTRPA
 from app.rpa.google_news import GoogleNewsRPA
 from app.rpa.google_web import GoogleWebRPA
+from app.rpa.news_aggregator import NewsAggregatorRPA
 from app.db.session import SessionLocal
 from app.models.search import Search, SearchResult, News
-from app.api.endpoints.stats import TRIBUNAL_TO_STATE, COORDS, CNJ_CODE_MAP
+from app.models.lawsuit import Lawsuit
+from app.core.constants import TRIBUNAL_TO_STATE, COORDS, CNJ_CODE_MAP
 import json
 import unicodedata
 import re
+from collections import defaultdict, Counter
+from datetime import datetime
 
 router = APIRouter()
 
@@ -63,8 +67,11 @@ def normalize_text(value: str) -> str:
     return normalized.upper()
 
 def is_relevant_content(value: str) -> bool:
-    text = normalize_text(value)
-    return any(keyword in text for keyword in RELEVANT_KEYWORDS)
+    """Verifica se o texto contém palavras-chave relevantes"""
+    if not value:
+        return True
+    text_upper = normalize_text(value)
+    return any(keyword in text_upper for keyword in RELEVANT_KEYWORDS)
 
 def parse_terms(raw: str | None) -> list[str]:
     if not raw:
@@ -262,13 +269,21 @@ def search_process(query: str, db: Session = Depends(get_db)):
         print(f"Erro Web: {e}")
         web_result = {"status": "error", "error": str(e), "results": []}
 
-    # 3. Executar RPA Google News
-    # (Sempre executa para trazer novidades, a menos que o usuário queira só local - mas o requisito é extender)
+    # 3. Executar RPA Google News + Agregador de Múltiplas Fontes
+    # Usa o agregador de notícias para buscar em múltiplos portais
     news_rpa = GoogleNewsRPA()
+    news_aggregator = NewsAggregatorRPA()
     news_result = {"results": [], "status": "pending"}
 
     try:
-        news_result = news_rpa.search(query)
+        # Primeiro tenta o agregador de notícias (múltiplas fontes)
+        try:
+            news_result = news_aggregator.search(query, max_pages=2)
+        except Exception as agg_error:
+            print(f"Erro no agregador: {agg_error}")
+            # Fallback para GoogleNewsRPA original
+            news_result = news_rpa.search(query)
+        
         filtered_news = []
         for item in news_result.get("results", []):
             text = f"{item.get('title', '')} {item.get('snippet', '')}"
@@ -278,15 +293,18 @@ def search_process(query: str, db: Session = Depends(get_db)):
 
         if news_result.get("status") == "success":
             for item in news_result.get("results", []):
-                exists = db.query(News).filter(News.url == item["url"]).first()
+                normalized_url = normalize_url(item.get("url", ""))
+                if not normalized_url:
+                    continue
+                exists = db.query(News).filter(News.url == normalized_url).first()
                 if not exists:
                     news_item = News(
                         search_id=search_record.id,
                         title=item["title"],
-                        url=item["url"],
+                        url=normalized_url,
                         source=item["source"],
                         snippet=item["snippet"],
-                        image_url=item["image_url"],
+                        image_url=item.get("image_url"),
                         published_date=item.get("published_date"),
                         city=item.get("city"),
                         state=item.get("state")
@@ -362,7 +380,13 @@ import logging
 logger = logging.getLogger("uvicorn.error")
 
 @router.post("/scan")
-def news_deep_scan(db: Session = Depends(get_db)):
+def news_deep_scan(
+    terms: str | None = Query(default=None),
+    states: str | None = Query(default=None),
+    max_pages: int = Query(default=3, ge=1, le=10),
+    per_query_limit: int = Query(default=50, ge=5, le=200),
+    db: Session = Depends(get_db)
+):
     """
     Realiza uma varredura massiva por casos históricos de exploração sexual e abuso de menores.
     Popula o banco de dados com os resultados encontrados.
@@ -377,7 +401,7 @@ def news_deep_scan(db: Session = Depends(get_db)):
             f.write(msg + "\n")
 
     log(f"DB URL in Scan: {db.bind.url}")
-    queries = [
+    base_queries = [
         "exploração sexual infanto juvenil",
         "exploração sexual de vulnerável",
         "abuso sexual infantil",
@@ -393,82 +417,86 @@ def news_deep_scan(db: Session = Depends(get_db)):
         "aliciamento de menores internet crime",
         "crime sexual contra vulneráveis"
     ]
+    custom_terms = parse_terms(terms)
+    queries = custom_terms if custom_terms else base_queries
+    state_list = [value.strip().upper() for value in parse_terms(states) if len(value.strip()) == 2]
     
     rpa = GoogleNewsRPA()
     total_found = 0
     
     for query in queries:
-        try:
-            log(f"Scanning query: {query}")
-            # Busca profunda (10 páginas para massa de dados)
-            result = rpa.search(query, max_pages=10)
-            log(f"RPA Result Status: {result.get('status')}")
-            
-            if result.get("status") == "success":
-                results_list = result.get("results", [])
-                filtered_results = []
-                for item in results_list:
-                    text = f"{item.get('title', '')} {item.get('snippet', '')}"
-                    if is_relevant_content(text):
-                        filtered_results.append(item)
-                results_list = filtered_results
-                log(f"Found {len(results_list)} results for query '{query}'")
+        query_variants = [query]
+        if state_list:
+            query_variants = [f"{query} {uf}" for uf in state_list]
 
-                # Criar registro de busca "sistema"
-                search_record = Search(query=query, tribunal="GoogleNewsDeepScan")
-                db.add(search_record)
-                db.commit()
-                db.refresh(search_record)
-                log(f"Created Search Record ID: {search_record.id}")
+        for query_term in query_variants:
+            try:
+                log(f"Scanning query: {query_term}")
+                result = rpa.search(query_term, max_pages=max_pages)
+                log(f"RPA Result Status: {result.get('status')}")
                 
-                batch_count = 0
-                seen_urls_in_batch = set()
-                
-                for item in results_list:
-                    url = item["url"]
+                if result.get("status") == "success":
+                    results_list = result.get("results", [])
+                    filtered_results = []
+                    for item in results_list:
+                        text = f"{item.get('title', '')} {item.get('snippet', '')}"
+                        if is_relevant_content(text):
+                            filtered_results.append(item)
+                    results_list = filtered_results[:per_query_limit]
+                    log(f"Found {len(results_list)} results for query '{query_term}'")
+
+                    search_record = Search(query=query_term, tribunal="GoogleNewsDeepScan")
+                    db.add(search_record)
+                    db.commit()
+                    db.refresh(search_record)
+                    log(f"Created Search Record ID: {search_record.id}")
                     
-                    # 1. Check duplicata no batch atual
-                    if url in seen_urls_in_batch:
-                        continue
+                    batch_count = 0
+                    seen_urls_in_batch = set()
+                    fallback_state = next((token for token in query_term.split() if len(token) == 2 and token.isalpha()), None)
+                    
+                    for item in results_list:
+                        raw_url = item.get("url")
+                        if not raw_url:
+                            continue
+                        url = normalize_url(raw_url)
                         
-                    # 2. Check duplicata no banco
-                    exists = db.query(News).filter(News.url == url).first()
-                    if not exists:
-                        news_item = News(
-                            search_id=search_record.id,
-                            title=item["title"],
-                            url=url,
-                            source=item["source"],
-                            snippet=item["snippet"],
-                            image_url=item["image_url"],
-                            published_date=item.get("published_date"),
-                            city=item.get("city"),
-                            state=item.get("state")
-                        )
-                        db.add(news_item)
-                        seen_urls_in_batch.add(url)
-                        # log(f"Added to session: {item['title'][:20]}...")
-                        total_found += 1
-                        batch_count += 1
-                
-                if batch_count > 0:
-                    log(f"Committing batch of {batch_count} items...")
-                    try:
-                        db.commit()
-                        log("Committed batch successfully.")
-                    except Exception as commit_error:
-                        log(f"COMMIT ERROR: {commit_error}")
-                        db.rollback()
-                else:
-                    log("No new items to commit in this batch.")
-                
-        except Exception as e:
-            log(f"CRITICAL ERROR in scan loop: {e}")
-            import traceback
-            # traceback.print_exc() # Can't capture this easily without io.StringIO
-            db.rollback()
-            continue
-            
+                        if url in seen_urls_in_batch:
+                            continue
+                            
+                        exists = db.query(News).filter(News.url == url).first()
+                        if not exists:
+                            news_item = News(
+                                search_id=search_record.id,
+                                title=item.get("title"),
+                                url=url,
+                                source=item.get("source"),
+                                snippet=item.get("snippet"),
+                                image_url=item.get("image_url"),
+                                published_date=item.get("published_date"),
+                                city=item.get("city"),
+                                state=item.get("state") or fallback_state
+                            )
+                            db.add(news_item)
+                            seen_urls_in_batch.add(url)
+                            total_found += 1
+                            batch_count += 1
+                    
+                    if batch_count > 0:
+                        log(f"Committing batch of {batch_count} items...")
+                        try:
+                            db.commit()
+                            log("Committed batch successfully.")
+                        except Exception as commit_error:
+                            log(f"COMMIT ERROR: {commit_error}")
+                            db.rollback()
+                    else:
+                        log("No new items to commit in this batch.")
+            except Exception as e:
+                log(f"CRITICAL ERROR in scan loop: {e}")
+                db.rollback()
+                continue
+
     return {"status": "completed", "new_records": total_found}
 
 @router.get("/catalog")
@@ -476,9 +504,10 @@ def list_catalog(
     city: str = None,
     state: str = None,
     term: str = None,
-    source_type: str = "all", # all, news, judicial
+    source_type: str = "news", # all, news, judicial
     type: str = None, # Alias para compatibilidade com versões antigas ou cache
     limit: int = 100,
+    page: int = 1,
     db: Session = Depends(get_db)
 ):
     """
@@ -488,6 +517,14 @@ def list_catalog(
     final_source_type = source_type
     if type and type != "all":
         final_source_type = type
+    if limit < 1:
+        limit = 1
+    if limit > 500:
+        limit = 500
+    if page < 1:
+        page = 1
+    offset = (page - 1) * limit
+    page_end = offset + limit
         
     results = []
     
@@ -495,7 +532,8 @@ def list_catalog(
     if final_source_type in ["all", "news"]:
         query = db.query(News)
         if city:
-            query = query.filter(News.city.ilike(f"%{city}%"))
+            if city.upper() == "DESCONHECIDO":
+                query = query.filter(or_(News.city == None, News.city == "", News.city.ilike("DESCONHECIDO")))
         if state:
             query = query.filter(News.state.ilike(f"%{state}%"))
         terms = parse_terms(term)
@@ -505,13 +543,27 @@ def list_catalog(
                 for t in terms
             ]
             query = query.filter(or_(*term_filters))
-        
+
         # Increase fetch limit to allow for relevance filtering
-        fetch_limit = limit * 10
+        fetch_limit = max(page_end * 4, limit * 20)
         news_items = query.order_by(News.created_at.desc()).limit(fetch_limit).all()
         for n in news_items:
             if not is_relevant_content(f"{n.title} {n.snippet}"):
                 continue
+
+            if city and city.upper() != "DESCONHECIDO":
+                import unicodedata
+                def normalize(s):
+                    if not s:
+                        return ""
+                    return ''.join(c for c in unicodedata.normalize('NFD', s.upper()) if unicodedata.category(c) != 'Mn')
+                
+                city_norm = normalize(city.upper())
+                n_city_norm = normalize(n.city or "DESCONHECIDO")
+                
+                if city_norm not in n_city_norm and n_city_norm not in city_norm:
+                    continue
+
             results.append({
                 "type": "news",
                 "id": n.id,
@@ -535,17 +587,18 @@ def list_catalog(
         # SQLite não tem suporte nativo bom para JSON, então filtramos em memória se necessário
         # Mas podemos filtrar por data para limitar
         
-        fetch_limit = limit * 10
+        fetch_limit = page_end * 10
         if city or state or term:
-            fetch_limit = max(limit * 20, 1000)
+            fetch_limit = max(page_end * 20, 1000)
         elif final_source_type == "judicial":
-            fetch_limit = max(limit * 10, 500)
+            fetch_limit = max(page_end * 10, 500)
         
         judicial_items = q.order_by(SearchResult.created_at.desc()).limit(fetch_limit).all()
         count = 0
+        target_count = page_end
         
         for row, tribunal in judicial_items:
-            if count >= limit:
+            if count >= target_count:
                 break
                 
             data = row.content
@@ -562,7 +615,7 @@ def list_catalog(
             # Mas idealmente checamos item a item
                 
             for item in data["results"]:
-                if count >= limit:
+                if count >= target_count:
                     break
 
                 # Filtro de Termo
@@ -598,7 +651,6 @@ def list_catalog(
                 if item_city:
                     final_city = item_city.upper()
                 else:
-                    # Heurística de Cidade
                     cidades_conhecidas = [k for k in COORDS.keys() if k != "DESCONHECIDO"]
                     for c in cidades_conhecidas:
                         if f" {c}" in f" {desc.upper()} " or f"DE {c}" in desc.upper() or f"COMARCA DE {c}" in desc.upper():
@@ -609,10 +661,27 @@ def list_catalog(
                 if item_state:
                     final_state = item_state.upper()
 
-                # Filtros Finais
-                if city and city.upper() not in final_city: 
-                    continue
-                
+                # Filtros Finais - Verificação tolerante (contém ou igual)
+                city_upper = city.upper() if city else ""
+                final_city_upper = final_city.upper()
+
+                # Trata variações de acento (normaliza para comparação)
+                import unicodedata
+                def normalize(s):
+                    if not s:
+                        return ""
+                    return ''.join(c for c in unicodedata.normalize('NFD', s.upper()) if unicodedata.category(c) != 'Mn')
+
+                city_norm = normalize(city_upper)
+                final_city_norm = normalize(final_city_upper)
+
+                if city:
+                    if city_norm == "DESCONHECIDO":
+                        if final_city_norm != "DESCONHECIDO" and final_city_norm != "":
+                            continue
+                    elif city_norm not in final_city_norm and final_city_norm not in city_norm:
+                        continue
+
                 if state and state.upper() != final_state:
                     continue
 
@@ -638,6 +707,84 @@ def list_catalog(
                 })
                 count += 1
 
+        if count < target_count:
+            lawsuits = db.query(Lawsuit).order_by(Lawsuit.created_at.desc()).limit(fetch_limit).all()
+            for law in lawsuits:
+                if count >= target_count:
+                    break
+
+                tribunal_clean = str(law.tribunal or "").split("+")[0].strip().upper()
+                if len(tribunal_clean) == 2:
+                    final_state = tribunal_clean
+                else:
+                    final_state = TRIBUNAL_TO_STATE.get(tribunal_clean, "BR")
+
+                final_city = "DESCONHECIDO"
+                if law.comarca:
+                    final_city = str(law.comarca).upper().replace("COMARCA DE ", "").replace("COMARCA DO ", "").replace("COMARCA DA ", "").strip()
+                elif law.court and " DE " in str(law.court).upper():
+                    # extract what comes after " DE "
+                    court_str = str(law.court).upper()
+                    if " DE " in court_str:
+                        final_city = court_str.split(" DE ", 1)[-1].strip()
+
+                search_text = f"{law.cnj or ''} {law.judge or ''} {law.court or ''} {law.class_type or ''} {law.subject or ''} {law.parties or ''}"
+                terms = parse_terms(term)
+                if terms and not any(t.upper() in search_text.upper() for t in terms):
+                    continue
+                if not is_relevant_content(search_text):
+                    continue
+
+                if city:
+                    import unicodedata
+                    def normalize(s):
+                        if not s:
+                            return ""
+                        return ''.join(c for c in unicodedata.normalize('NFD', s.upper()) if unicodedata.category(c) != 'Mn')
+                    city_norm = normalize(city.upper())
+                    final_city_norm = normalize(final_city.upper())
+                    if city_norm == "DESCONHECIDO":
+                        if final_city_norm != "DESCONHECIDO" and final_city_norm != "":
+                            continue
+                    elif city_norm not in final_city_norm and final_city_norm not in city_norm:
+                        continue
+                if state and state.upper() != final_state:
+                    continue
+
+                parties_data = law.parties
+                if isinstance(parties_data, str):
+                    try:
+                        parties_data = json.loads(parties_data)
+                    except Exception:
+                        parties_data = []
+
+                results.append({
+                    "type": "judicial",
+                    "id": law.id,
+                    "title": law.class_type or "Processo Judicial",
+                    "snippet": law.subject or law.status or "",
+                    "source": law.tribunal or "TRIBUNAL",
+                    "url": None,
+                    "image_url": None,
+                    "published_date": law.distribution_date,
+                    "city": final_city,
+                    "state": final_state,
+                    "created_at": law.created_at,
+                    "processo": law.cnj,
+                    "classe": law.class_type,
+                    "assunto": law.subject,
+                    "foro": law.comarca,
+                    "vara": law.court,
+                    "juiz": law.judge,
+                    "endereco_forum": law.forum_address,
+                    "status": law.status,
+                    "data_distribuicao": law.distribution_date,
+                    "data_ultima_movimentacao": law.last_movement_date,
+                    "partes": parties_data or [],
+                    "movimentacoes": law.movements
+                })
+                count += 1
+
     # Ordenar final por data (misturando news e judicial)
     results.sort(key=lambda x: x["created_at"] or "", reverse=True)
 
@@ -651,13 +798,24 @@ def list_catalog(
             source = (item.get("source") or "").strip().lower()
             published = str(item.get("published_date") or "").strip().lower()
             return f"news:{title}|{source}|{published}"
-        raw_process = item.get("processo") or item.get("numero_processo") or item.get("id")
+        raw_process = item.get("processo") or item.get("numero_processo")
         process_key = re.sub(r"\D", "", str(raw_process or ""))
         if process_key:
             return f"judicial:{process_key}"
+        
+        # If no process number, use id if it came from Lawsuit (which is unique per item), 
+        # but since we can't easily distinguish Lawsuit ID from SearchResult ID here,
+        # we fallback to content-based deduplication
         title = (item.get("title") or "").strip().lower()
         source = (item.get("source") or "").strip().lower()
-        return f"judicial:{title}|{source}"
+        snippet = (item.get("snippet") or item.get("assunto") or "").strip().lower()
+        
+        # If even content is missing, use a random UUID so we don't deduplicate falsely
+        if not title and not snippet:
+            import uuid
+            return f"judicial:uuid:{uuid.uuid4()}"
+            
+        return f"judicial:{title}|{source}|{snippet}"
 
     unique_results = []
     seen = set()
@@ -668,7 +826,7 @@ def list_catalog(
         seen.add(key)
         unique_results.append(item)
     
-    return unique_results[:limit]
+    return unique_results[offset:page_end]
 
 @router.delete("/clean/news")
 def clean_news_duplicates(limit: int = 5000, db: Session = Depends(get_db)):
@@ -693,3 +851,354 @@ def clean_news_duplicates(limit: int = 5000, db: Session = Depends(get_db)):
         removed = db.query(News).filter(News.id.in_(duplicate_ids)).delete(synchronize_session=False)
         db.commit()
     return {"removed": removed, "scanned": len(news_items)}
+
+STATE_TO_REGION = {
+    "AC": "Norte", "AP": "Norte", "AM": "Norte", "PA": "Norte", "RO": "Norte", "RR": "Norte", "TO": "Norte",
+    "AL": "Nordeste", "BA": "Nordeste", "CE": "Nordeste", "MA": "Nordeste", "PB": "Nordeste", "PE": "Nordeste", "PI": "Nordeste", "RN": "Nordeste", "SE": "Nordeste",
+    "DF": "Centro-Oeste", "GO": "Centro-Oeste", "MT": "Centro-Oeste", "MS": "Centro-Oeste",
+    "ES": "Sudeste", "MG": "Sudeste", "RJ": "Sudeste", "SP": "Sudeste",
+    "PR": "Sul", "RS": "Sul", "SC": "Sul"
+}
+
+LOCAL_SOURCE_HINTS = [
+    "diário", "diario", "gazeta", "tribuna", "folha", "jornal", "portal", "rádio", "radio",
+    "tv", "prefeitura", "regional", "interior", "cidade", "municipal"
+]
+
+NATIONAL_SOURCE_HINTS = [
+    "g1", "uol", "terra", "cnn", "globo", "estadão", "estadao", "folha de s", "veja", "r7", "band"
+]
+
+STOPWORDS = {
+    "de", "da", "do", "das", "dos", "e", "em", "no", "na", "nos", "nas", "para", "por", "com", "sem",
+    "um", "uma", "uns", "umas", "a", "o", "as", "os", "sobre", "contra", "após", "apos", "entre"
+}
+
+def _safe_upper(value: str | None) -> str:
+    return normalize_text(value or "").strip()
+
+def _normalize_date_label(value: str | None) -> str:
+    raw = (value or "").strip()
+    if not raw:
+        return "data não informada"
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            dt = datetime.strptime(raw[:19], fmt)
+            return dt.strftime("%d/%m/%Y")
+        except Exception:
+            continue
+    return raw
+
+def _to_state_code(item: dict) -> str:
+    state = str(item.get("state") or "").upper().strip()
+    if len(state) == 2 and state in STATE_TO_REGION:
+        return state
+    source = str(item.get("source") or "").split("+")[0].strip().upper()
+    if len(source) == 2 and source in STATE_TO_REGION:
+        return source
+    mapped = TRIBUNAL_TO_STATE.get(source)
+    if mapped in STATE_TO_REGION:
+        return mapped
+    return "NA"
+
+def _classify_source_scope(source: str) -> str:
+    normalized = _safe_upper(source)
+    if any(_safe_upper(hint) in normalized for hint in NATIONAL_SOURCE_HINTS):
+        return "nacional"
+    if any(_safe_upper(hint) in normalized for hint in LOCAL_SOURCE_HINTS):
+        return "local"
+    return "regional"
+
+def _extract_focus_topic(text: str) -> str:
+    normalized = _safe_upper(text)
+    topic_map = {
+        "exploração sexual": ["EXPLORACAO SEXUAL", "TRAFICO SEXUAL", "TRAFICO DE PESSOAS"],
+        "abuso sexual infantil": ["ABUSO SEXUAL INFANTIL", "ABUSO INFANTIL", "PORNOGRAFIA INFANTIL"],
+        "violência sexual contra vulneráveis": ["ESTUPRO DE VULNERAVEL", "ABUSO SEXUAL DE INCAPAZ", "VIOLENCIA SEXUAL"],
+        "aliciamento e crimes digitais": ["ALICIAMENTO", "INTERNET", "PREDADOR SEXUAL", "PEDOFILIA"]
+    }
+    for topic, tokens in topic_map.items():
+        if any(token in normalized for token in tokens):
+            return topic
+    return "crimes sexuais e violência contra vulneráveis"
+
+def _extract_who(title: str) -> str:
+    cleaned = (title or "").strip()
+    if not cleaned:
+        return "agentes citados pela imprensa"
+    for sep in [":", "-", "—", "|"]:
+        if sep in cleaned:
+            candidate = cleaned.split(sep, 1)[0].strip()
+            if len(candidate) >= 4:
+                return candidate
+    return cleaned[:90]
+
+def _extract_what(snippet: str, title: str) -> str:
+    base = (snippet or "").strip() or (title or "").strip()
+    if not base:
+        return "fato sem detalhamento textual na fonte indexada"
+    sentence = re.split(r"[.!?]", base, maxsplit=1)[0].strip()
+    return sentence[:180]
+
+def _extract_modus(text: str) -> str:
+    normalized = _safe_upper(text)
+    modus_map = [
+        ("aliciamento digital", ["INTERNET", "REDE SOCIAL", "APLICATIVO", "MENSAGEM"]),
+        ("abordagem presencial de vulneráveis", ["ABORDOU", "EM FLAGRANTE", "EM RESIDENCIA", "EM ESCOLA"]),
+        ("rede de exploração com múltiplos envolvidos", ["OPERACAO", "QUADRILHA", "ASSOCIACAO", "GRUPO"]),
+        ("produção ou compartilhamento de material ilícito", ["PORNOGRAFIA", "ARQUIVO", "FOTO", "VIDEO"])
+    ]
+    for label, tokens in modus_map:
+        if any(token in normalized for token in tokens):
+            return label
+    return "modus operandi não explicitado de forma objetiva pela reportagem"
+
+def _event_signature(item: dict) -> str:
+    title = _safe_upper(item.get("title") or "")
+    city = _safe_upper(item.get("city") or "DESCONHECIDO")
+    state = _safe_upper(item.get("state") or "BR")
+    tokens = [token for token in re.findall(r"[A-Z0-9]+", title) if token.lower() not in STOPWORDS and len(token) > 2]
+    base = " ".join(tokens[:7])
+    return f"{state}|{city}|{base}"
+
+def _build_storytelling(news_items: list[dict], term: str | None) -> tuple[str, list[dict]]:
+    deduped = []
+    seen = set()
+    for item in news_items:
+        key = normalize_url(item.get("url") or "")
+        if not key:
+            key = f"{_safe_upper(item.get('title'))}|{_safe_upper(item.get('source'))}|{_safe_upper(item.get('published_date'))}"
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+
+    if not deduped:
+        empty_story = (
+            "### Storytelling Jornalístico-Analítico\n\n"
+            "Na janela de consulta atual, a imprensa não apresentou volume suficiente de reportagens públicas para compor uma narrativa factual robusta. "
+            "Mesmo assim, a leitura mantém foco em evidências jornalísticas verificáveis e evita inferências não sustentadas.\n\n"
+            "#### Apresentação\n"
+            "O tema analisado permanece em monitoramento, aguardando novas publicações em veículos nacionais e locais.\n\n"
+            "#### Desenvolvimento dos Fatos\n"
+            "Sem amostra jornalística consistente nesta consulta, não há base para descrever escalada territorial ou sequência de eventos com segurança analítica.\n\n"
+            "#### Conclusão\n"
+            "O panorama midiático atual é de baixa densidade informacional para o recorte solicitado."
+        )
+        return empty_story, []
+
+    grouped = defaultdict(list)
+    for item in deduped:
+        grouped[_event_signature(item)].append(item)
+
+    ordered_groups = sorted(grouped.values(), key=len, reverse=True)
+    local_count = 0
+    national_count = 0
+    sources = set()
+    states = set()
+    cities = set()
+    facts = []
+
+    for group in ordered_groups:
+        pivot = group[0]
+        source = str(pivot.get("source") or "imprensa não identificada")
+        scope = _classify_source_scope(source)
+        if scope == "local":
+            local_count += 1
+        if scope == "nacional":
+            national_count += 1
+
+        city = str(pivot.get("city") or "não informado")
+        state = str(pivot.get("state") or "BR")
+        states.add(state)
+        cities.add(city)
+        sources.add(source)
+
+        title = str(pivot.get("title") or "")
+        snippet = str(pivot.get("snippet") or "")
+        text = f"{title} {snippet}"
+        facts.append({
+            "who": _extract_who(title),
+            "what": _extract_what(snippet, title),
+            "when": _normalize_date_label(pivot.get("published_date") or pivot.get("created_at")),
+            "where": f"{city}/{state}",
+            "modus": _extract_modus(text),
+            "source": source,
+            "scope": scope,
+            "reports_count": len(group)
+        })
+
+    main_topic = _extract_focus_topic(term or " ".join([str(item.get("title") or "") for item in deduped[:20]]))
+    top_sources = ", ".join(sorted(list(sources))[:4]) or "fontes jornalísticas diversas"
+    top_groups = facts[:4]
+
+    story_parts = [
+        "### Storytelling Jornalístico-Analítico",
+        "",
+        "#### Apresentação",
+        f"O caso em evidência, segundo a cobertura da imprensa, gira em torno de **{main_topic}**. "
+        f"Conforme reportado por veículos de circulação nacional e por jornais regionais, a narrativa reúne {len(deduped)} reportagens úteis, "
+        f"com ocorrências em {len(states)} estados e {len(cities)} cidades. As menções mais recorrentes aparecem em {top_sources}.",
+        "",
+        "#### Desenvolvimento dos Fatos",
+    ]
+
+    for idx, fact in enumerate(top_groups, start=1):
+        source_phrase = "imprensa local" if fact["scope"] == "local" else ("grandes jornais de circulação nacional" if fact["scope"] == "nacional" else "veículos regionais")
+        multiplicity = f" (com {fact['reports_count']} reportagens convergentes)" if fact["reports_count"] > 1 else ""
+        story_parts.append(
+            f"{idx}. Segundo {source_phrase}, em {fact['when']}, **{fact['who']}** foi citado em contexto de {fact['what']}{multiplicity}. "
+            f"O ponto geográfico associado é {fact['where']}, e o suposto modus operandi descrito publicamente indica {fact['modus']}."
+        )
+
+    story_parts.extend([
+        "",
+        "#### Conclusão",
+        f"O panorama midiático atual mostra combinação de cobertura nacional ({national_count} núcleos de eventos) e capilaridade local ({local_count} núcleos), "
+        "o que sugere continuidade temática entre municípios e possível repetição de padrões noticiados. "
+        "A leitura permanece estritamente factual e baseada no que foi publicado em fontes abertas."
+    ])
+
+    return "\n".join(story_parts), facts
+
+def _build_judicial_bi(lawsuits: list[dict]) -> dict:
+    total_national = len(lawsuits)
+    known_total = 0
+    state_counts = Counter()
+    city_counts = Counter()
+    region_counts = Counter()
+    unknown_state_cases = 0
+
+    for law in lawsuits:
+        state = _to_state_code(law)
+        city = str(law.get("city") or "DESCONHECIDO").strip().upper() or "DESCONHECIDO"
+        if state in STATE_TO_REGION:
+            state_counts[state] += 1
+            city_counts[(city, state)] += 1
+            region = STATE_TO_REGION.get(state, "Não classificado")
+            region_counts[region] += 1
+            known_total += 1
+        else:
+            unknown_state_cases += 1
+
+    regional_distribution = []
+    for region, count in region_counts.most_common():
+        pct = (count / known_total * 100) if known_total else 0
+        regional_distribution.append({"region": region, "count": count, "percent": round(pct, 2)})
+
+    state_ranking = [{"state": state, "count": count} for state, count in state_counts.most_common(10)]
+    municipal_focus = [{"city": city, "state": state, "count": count} for (city, state), count in city_counts.most_common(10)]
+
+    return {
+        "total_national": total_national,
+        "known_state_total": known_total,
+        "unknown_state_cases": unknown_state_cases,
+        "regional_distribution": regional_distribution,
+        "state_ranking": state_ranking,
+        "municipal_focus": municipal_focus
+    }
+
+def _build_news_bi(news_items: list[dict]) -> dict:
+    total_national = len(news_items)
+    known_total = 0
+    state_counts = Counter()
+    city_counts = Counter()
+    region_counts = Counter()
+    unknown_state_cases = 0
+
+    for item in news_items:
+        state = str(item.get("state") or "NA").strip().upper()
+        city = str(item.get("city") or "DESCONHECIDO").strip().upper() or "DESCONHECIDO"
+        if state in STATE_TO_REGION:
+            state_counts[state] += 1
+            city_counts[(city, state)] += 1
+            region_counts[STATE_TO_REGION[state]] += 1
+            known_total += 1
+        else:
+            unknown_state_cases += 1
+
+    regional_distribution = []
+    for region, count in region_counts.most_common():
+        pct = (count / known_total * 100) if known_total else 0
+        regional_distribution.append({"region": region, "count": count, "percent": round(pct, 2)})
+
+    state_ranking = [{"state": state, "count": count} for state, count in state_counts.most_common(10)]
+    municipal_focus = [{"city": city, "state": state, "count": count} for (city, state), count in city_counts.most_common(10)]
+    return {
+        "total_national": total_national,
+        "known_state_total": known_total,
+        "unknown_state_cases": unknown_state_cases,
+        "regional_distribution": regional_distribution,
+        "state_ranking": state_ranking,
+        "municipal_focus": municipal_focus
+    }
+
+def _format_bi_markdown(bi: dict) -> str:
+    lines = ["### Panorama Estatístico (BI)", ""]
+    lines.append("#### Nível Nacional")
+    lines.append(f"- Total de registros identificados: **{bi.get('total_national', 0)}**")
+    lines.append("")
+    lines.append("#### Nível Regional")
+    regional = bi.get("regional_distribution", [])
+    if regional:
+        for item in regional:
+            lines.append(f"- **{item['region']}**: {item['count']} registros ({item['percent']}%)")
+    else:
+        lines.append("- Dados insuficientes para distribuição regional.")
+    lines.append("")
+    lines.append("#### Nível Estadual")
+    state_ranking = bi.get("state_ranking", [])
+    if state_ranking:
+        for item in state_ranking[:5]:
+            lines.append(f"- **{item['state']}**: {item['count']} registros")
+    else:
+        lines.append("- Sem volume estadual consolidado no recorte atual.")
+    lines.append("")
+    lines.append("#### Nível Municipal")
+    municipal_focus = bi.get("municipal_focus", [])
+    if municipal_focus:
+        for item in municipal_focus[:8]:
+            lines.append(f"- **{item['city']}/{item['state']}**: {item['count']} registros")
+    else:
+        lines.append("- Sem focos municipais suficientes para ranqueamento.")
+    return "\n".join(lines)
+
+@router.get("/analyze")
+def analyze_data(
+    city: str = None,
+    state: str = None,
+    term: str = None,
+    db: Session = Depends(get_db)
+):
+    news_items = list_catalog(
+        city=city,
+        state=state,
+        term=term,
+        source_type="news",
+        limit=400,
+        page=1,
+        db=db
+    )
+    lawsuits = list_catalog(
+        city=city,
+        state=state,
+        term=term,
+        source_type="judicial",
+        limit=5000,
+        page=1,
+        db=db
+    )
+    storytelling, facts = _build_storytelling(news_items=news_items, term=term)
+    bi = _build_judicial_bi(lawsuits=lawsuits) if lawsuits else _build_news_bi(news_items=news_items)
+    bi_markdown = _format_bi_markdown(bi)
+    analysis_text = f"{storytelling}\n\n{bi_markdown}"
+
+    return {
+        "status": "success",
+        "total_news": len(news_items),
+        "total_lawsuits": len(lawsuits),
+        "analysis": analysis_text,
+        "storytelling": storytelling,
+        "judicial_bi": bi,
+        "news_facts": facts
+    }

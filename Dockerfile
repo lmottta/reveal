@@ -2,6 +2,12 @@
 # Use the official Playwright image which includes browsers and system dependencies
 FROM mcr.microsoft.com/playwright/python:v1.41.0-jammy
 
+# Install system dependencies (including Tesseract OCR)
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    libtesseract-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set working directory inside the container
 WORKDIR /app
 

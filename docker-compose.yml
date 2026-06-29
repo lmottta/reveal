@@ -1,6 +1,3 @@
-
-version: '3.8'
-
 services:
   backend:
     build:
@@ -11,11 +8,14 @@ services:
       - "8000:8000"
     environment:
       - PORT=8000
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - DATABASE_URL=postgresql://reveal_user:reveal_password@db:5432/reveal_db
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=reveal_user
+      - POSTGRES_PASSWORD=reveal_password
+      - POSTGRES_DB=reveal_db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   db:
@@ -29,6 +29,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./migrations/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reveal_user -d reveal_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
 volumes:

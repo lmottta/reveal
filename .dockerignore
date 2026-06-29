@@ -25,6 +25,10 @@ backend/scan_log.txt
 *.png
 *.html
 !backend/static/index.html
+!backend/static/**/*.html
+!backend/static/img/background.png
+!backend/static/favicon.ico
+!migrations/
 docker-compose.yml
 README.md
 LICENSE

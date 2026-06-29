@@ -54,10 +54,14 @@ venv.bak/
 
 # Project specific
 backend/scan_log.txt
-# *.png  <-- Removed to allow static assets
-# *.html <-- Removed to allow static assets
-# !backend/static/index.html
 *.log
+*.png
+*.html
+!backend/static/**/*.html
+!backend/static/**/*.png
+!backend/static/favicon.ico
+debug_*
+nul
 backend/static/img/Driver_Booster_v12.1.0.469.exe
 backend/static/img/driver_booster_setup.exe
 
@@ -78,3 +82,11 @@ test-results/
 # Local scripts
 start_reveal.bat
 run_system.bat
+
+# Test database
+test_reveal.db
+test.db
+
+# SQLite database (use PostgreSQL via Docker)
+backend/reveal.db
+reveal.db

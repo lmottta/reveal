@@ -1,8 +1,11 @@
 from typing import Dict, Any, List
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from urllib.parse import quote_plus
+from urllib.request import urlopen, Request
 # from playwright.sync_api import sync_playwright # Lazy import
 import time
 import re
+import xml.etree.ElementTree as ET
 from app.rpa.base import BaseRPA
 
 class GoogleNewsRPA(BaseRPA):
@@ -66,16 +69,23 @@ class GoogleNewsRPA(BaseRPA):
                     try:
                         page.goto(url, timeout=30000)
                         
-                        # Check for cookie consent
-                        try:
-                            page.click("button:has-text('Aceitar')", timeout=2000)
-                        except:
-                            pass
-
-                        page.wait_for_selector("#search", timeout=10000)
+                        for selector in [
+                            "button:has-text('Aceitar tudo')",
+                            "button:has-text('Aceitar')",
+                            "button:has-text('I agree')",
+                            "button:has-text('Accept all')"
+                        ]:
+                            try:
+                                page.click(selector, timeout=1500)
+                                break
+                            except Exception:
+                                continue
+                        page.wait_for_selector("body", timeout=10000)
                         
                         # Extract news items
-                        articles = page.locator("div.SoaBEf, div.MjjYud").all()
+                        articles = page.locator("div.SoaBEf, div.MjjYud, div.Gx5Zad, article").all()
+                        if not articles:
+                            articles = page.locator("a.WlydOe, a[jsname='UWckNb']").all()
                         
                         if not articles:
                             break
@@ -84,12 +94,19 @@ class GoogleNewsRPA(BaseRPA):
                             try:
                                 title_el = article.locator("div[role='heading'], h3").first
                                 link_el = article.locator("a").first
+                                is_link_node = False
+                                if not title_el.count() and not link_el.count():
+                                    title_el = article
+                                    link_el = article
+                                    is_link_node = True
                                 
                                 if not title_el.count() or not link_el.count():
                                     continue
                                     
                                 title = title_el.inner_text()
                                 link = link_el.get_attribute("href")
+                                if is_link_node and not title:
+                                    title = link_el.inner_text()
                                 
                                 source_el = article.locator(".CEMjEf, .NUnG9d, span").first
                                 source = source_el.inner_text() if source_el.count() else "Desconhecido"
@@ -131,7 +148,7 @@ class GoogleNewsRPA(BaseRPA):
                                 # Inferir localização
                                 loc = self._infer_location(f"{title} {snippet}")
                                 
-                                if link and title:
+                                if link and title and link.startswith("http"):
                                     results.append({
                                         "title": title,
                                         "url": link,
@@ -154,6 +171,8 @@ class GoogleNewsRPA(BaseRPA):
                 
                 browser.close()
 
+                if not results:
+                    results = self._search_rss(query, max_items=max_pages * 25)
                 results = self._dedupe_results(results)
                 return {
                     "source": "Google News",
@@ -163,11 +182,75 @@ class GoogleNewsRPA(BaseRPA):
                 }
 
         except Exception as e:
+            fallback_results = self._search_rss(query, max_items=max_pages * 25)
+            if fallback_results:
+                return {
+                    "source": "Google News",
+                    "status": "success",
+                    "query": query,
+                    "results": self._dedupe_results(fallback_results)
+                }
             return {
                 "source": "Google News",
                 "status": "error",
                 "error": str(e)
             }
+
+    def _extract_real_url(self, google_url: str) -> str:
+        """Extrai a URL real de um link do Google News"""
+        if not google_url:
+            return ""
+        try:
+            if "news.google.com" in google_url:
+                parsed = urlsplit(google_url)
+                params = dict(parse_qsl(parsed.query))
+                if "url" in params:
+                    return params["url"]
+            return google_url
+        except Exception:
+            return google_url
+
+    def _search_rss(self, query: str, max_items: int = 25) -> List[Dict[str, Any]]:
+        items: List[Dict[str, Any]] = []
+        url = f"https://news.google.com/rss/search?q={quote_plus(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+        try:
+            request = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urlopen(request, timeout=20) as response:
+                payload = response.read()
+            root = ET.fromstring(payload)
+            channel = root.find("channel")
+            if channel is None:
+                return items
+            for node in channel.findall("item")[:max_items]:
+                title = (node.findtext("title") or "").strip()
+                link = (node.findtext("link") or "").strip()
+                description = (node.findtext("description") or "").strip()
+                pub_date = (node.findtext("pubDate") or "").strip()
+                source = "Google News"
+                source_node = node.find("{http://search.yahoo.com/mrss/}source")
+                if source_node is not None and source_node.text:
+                    source = source_node.text.strip()
+                clean_title = re.sub(r"\s*-\s*[^-]+$", "", title).strip()
+                snippet = re.sub(r"<[^>]+>", " ", description)
+                snippet = re.sub(r"\s+", " ", snippet).strip()
+                loc = self._infer_location(f"{clean_title} {snippet}")
+                
+                real_url = self._extract_real_url(link)
+                
+                if clean_title and real_url:
+                    items.append({
+                        "title": clean_title,
+                        "url": real_url,
+                        "source": source,
+                        "snippet": snippet,
+                        "published_date": pub_date,
+                        "image_url": None,
+                        "city": loc["city"],
+                        "state": loc["state"]
+                    })
+        except Exception:
+            return items
+        return items
 
     def _normalize_url(self, url: str) -> str:
         if not url:

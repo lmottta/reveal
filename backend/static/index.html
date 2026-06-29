@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JuriPopular | Expondo o que a justiça esconde</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -54,6 +54,13 @@
         border-bottom: 1px solid var(--border);
         background: rgba(5, 5, 8, 0.88);
       }
+      @media (max-width: 640px) {
+        header {
+          padding: 12px 16px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+      }
       .brand {
         display: flex;
         align-items: center;
@@ -64,6 +71,18 @@
         height: 64px;
         object-fit: contain;
         filter: drop-shadow(0 6px 18px rgba(255, 255, 255, 0.2));
+      }
+      @media (max-width: 480px) {
+        .brand-logo {
+          width: 48px;
+          height: 48px;
+        }
+        .brand h1 {
+          font-size: 20px;
+        }
+        .brand span {
+          font-size: 11px;
+        }
       }
       .brand h1 {
         font-family: "Cinzel", serif;
@@ -81,6 +100,15 @@
         display: flex;
         align-items: center;
         gap: 12px;
+      }
+      @media (max-width: 480px) {
+        .top-actions {
+          gap: 8px;
+        }
+        .btn {
+          padding: 8px 12px;
+          font-size: 11px;
+        }
       }
       .btn {
         padding: 10px 16px;
@@ -106,11 +134,31 @@
       }
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 320px;
+        grid-template-columns: 1fr 320px;
         gap: 24px;
         padding: 24px;
         max-width: 1600px;
         margin: 0 auto;
+      }
+      @media (max-width: 1024px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .side-panel {
+          position: static;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 12px;
+        }
+      }
+      @media (max-width: 640px) {
+        .layout {
+          padding: 16px;
+          gap: 16px;
+        }
+        .side-panel {
+          grid-template-columns: 1fr;
+        }
       }
       .side-panel {
         position: sticky;
@@ -174,6 +222,14 @@
         font-size: 18px;
         font-weight: 600;
         letter-spacing: 0.5px;
+        min-width: 150px;
+      }
+      .catalog-toolbar .toolbar-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        flex: 1;
       }
       .catalog-toolbar input, 
       .catalog-toolbar select {
@@ -183,6 +239,13 @@
         padding: 8px 12px;
         border-radius: 6px;
         font-size: 13px;
+        min-width: 70px;
+        flex: 1;
+      }
+      .catalog-toolbar input:focus,
+      .catalog-toolbar select:focus {
+        outline: none;
+        border-color: var(--accent);
       }
       .catalog-toolbar button {
         background: var(--accent-soft);
@@ -194,10 +257,33 @@
         font-weight: 600;
         text-transform: uppercase;
         font-size: 12px;
+        white-space: nowrap;
       }
       .catalog-toolbar button:hover {
         background: var(--accent);
         color: white;
+      }
+      .catalog-toolbar .pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      @media (max-width: 768px) {
+        .catalog-toolbar {
+          padding: 12px;
+          gap: 10px;
+        }
+        .catalog-toolbar h2 {
+          width: 100%;
+          margin-bottom: 8px;
+        }
+        .catalog-toolbar .toolbar-row {
+          width: 100%;
+        }
+        .catalog-toolbar input,
+        .catalog-toolbar select {
+          min-width: 100px;
+        }
       }
       .nav-tabs {
         display: flex;
@@ -424,12 +510,12 @@
       #catalog-grid,
       .cards-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 16px;
       }
       @media (max-width: 1200px) {
         #catalog-grid,
-        .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .cards-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
       }
       @media (max-width: 768px) {
         #catalog-grid,
@@ -443,7 +529,14 @@
         box-shadow: var(--shadow);
         display: flex;
         flex-direction: column;
-        min-height: 280px;
+        min-height: 240px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        border-color: var(--accent);
       }
       .card-thumb {
         height: 120px;
@@ -455,32 +548,61 @@
         justify-content: center;
         font-size: 26px;
         color: rgba(255, 255, 255, 0.35);
+        position: relative;
+        overflow: hidden;
+      }
+      .card-thumb::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.4) 100%);
       }
       .card-body {
         padding: 14px 16px 16px;
         display: grid;
         gap: 8px;
+        flex: 1;
       }
       .card-meta {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         font-size: 11px;
         text-transform: uppercase;
         color: var(--muted);
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .card-meta .source {
+        max-width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .card-title {
         font-weight: 700;
         font-size: 14px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
       .card-snippet {
         font-size: 12px;
         color: #c6c6d1;
         min-height: 36px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
       }
       .card-action {
         margin-top: auto;
         display: flex;
         justify-content: flex-end;
+        padding-top: 8px;
       }
       .card-action button {
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -490,6 +612,24 @@
         border-radius: 8px;
         cursor: pointer;
         font-size: 12px;
+        transition: all 0.2s ease;
+      }
+      .card-action button:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .card-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--accent);
+        color: white;
+        font-size: 10px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: 600;
+        z-index: 2;
       }
       #modal-overlay {
         position: fixed;
@@ -513,6 +653,29 @@
         position: absolute;
         display: grid;
         gap: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+        animation: modalSlideIn 0.25s ease;
+      }
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      .modal-card::-webkit-scrollbar {
+        width: 8px;
+      }
+      .modal-card::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 4px;
+      }
+      .modal-card::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 4px;
       }
       .modal-header {
         display: flex;
@@ -574,6 +737,64 @@
         padding: 12px;
         font-size: 12px;
         color: #d0d0da;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+      .detail-box a {
+        color: #9db8ff;
+        text-decoration: none;
+        word-break: break-all;
+        overflow-wrap: break-word;
+        display: block;
+        max-width: 100%;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+      .detail-box a:hover {
+        text-decoration: underline;
+      }
+      .source-link-box {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.15), rgba(229, 9, 20, 0.05));
+        border-color: var(--accent);
+      }
+      .source-link {
+        display: block;
+        padding: 10px 12px;
+        background: rgba(229, 9, 20, 0.1);
+        border-radius: 6px;
+        margin-top: 8px;
+        font-family: monospace;
+        font-size: 11px;
+        word-break: break-all;
+        color: #ff6b6b;
+        text-decoration: none;
+      }
+      .source-link:hover {
+        background: var(--accent);
+        color: white;
+      }
+      .storytelling-box {
+        background: linear-gradient(135deg, rgba(20, 20, 30, 0.95), rgba(10, 10, 15, 0.98));
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #e8e8f0;
+        border-left: 4px solid var(--accent);
+      }
+      .storytelling-box p {
+        margin: 0 0 12px 0;
+      }
+      .storytelling-box p:last-child {
+        margin-bottom: 0;
+      }
+      .storytelling-box strong {
+        color: #fff;
+      }
+      .storytelling-box em {
+        color: #b0b0c0;
+        font-style: italic;
       }
       .detail-box strong {
         display: block;
@@ -657,8 +878,6 @@
         <div class="top-actions">
           <button class="btn primary" id="open-map">VER NO MAPA</button>    
           <button class="btn" id="open-catalog">Catálogo</button>
-          <button class="btn primary" id="open-analysis" style="background: linear-gradient(135deg, #1c1c26 0%, #14141d 60%, rgba(138, 43, 226, 0.2) 100%); border-color: rgba(138, 43, 226, 0.5);">Análise Profunda</button>
-          <div class="session">ID_SESSÃO: <span id="session-id"></span></div>
         </div>
       </header>
       <main class="layout">
@@ -666,33 +885,15 @@
           <section id="map-view" class="view-section active">
             <div class="map-shell">
               <div id="map"></div>
-              <div class="map-panel">
-                <h4>Camadas de Inteligência</h4>
-                <label>
-                  <input id="layer-news" type="checkbox" checked />
-                  <span>MÍDIA / NOTÍCIAS</span>
-                </label>
-                <label>
-                  <input id="layer-judicial" type="checkbox" checked />
-                  <span>JUDICIAL / TRIBUNAIS</span>
-                </label>
-                <input id="map-term" type="text" placeholder="Filtrar por Crime..." />
-              </div>
-              <div class="legend">
-                <h4>Legenda</h4>
-                <div class="legend-item"><span class="dot judicial"></span>Judicial</div>
-                <div class="legend-item"><span class="dot news"></span>Notícias</div>
-                <div class="legend-item"><span class="dot mixed"></span>Misto</div>
-              </div>
               <div class="geo-tag">Inteligência Geo</div>
             </div>
           </section>
 
           <section id="analysis-view" class="view-section">
             <div class="panel-box">
-              <h2 style="margin-top: 0; color: #fff; font-family: 'Cinzel', serif;">Análise Profunda de Dados</h2>
+              <h2 style="margin-top: 0; color: #fff; font-family: 'Cinzel', serif;">Dossiê Narrativo Nacional</h2>
               <div id="analysis-content" style="white-space: pre-wrap; line-height: 1.6; font-size: 15px; color: var(--text);">
-                Carregando análise baseada nos dados atuais...
+                Carregando storytelling jornalístico e panorama estatístico...
               </div>
             </div>
           </section>
@@ -736,10 +937,13 @@
                 </select>
                 <div id="city-loader" style="display:none; position:absolute; right:10px; top:10px; width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
               </div>
-              <select id="filter-type">
-                <option value="all">Todos</option>
-                <option value="judicial">Judicial</option>
-                <option value="news">Notícias</option>
+              <select id="search-mode" title="Tipo de busca">
+                <option value="general">Busca geral</option>
+                <option value="name">Nome</option>
+                <option value="news">Notícia</option>
+                <option value="city">Cidade</option>
+                <option value="region">Região</option>
+                <option value="state">Estado</option>
               </select>
               <input id="filter-term" type="text" placeholder="Buscar..." style="flex:1">
               <button id="btn-filter">Filtrar</button>
@@ -762,23 +966,11 @@
 
         <aside class="side-panel">
           <div class="panel-box">
-            <h3>Buscar por processos</h3>
-            <div class="search-field">
-              <input id="process-query" type="text" placeholder="8933407-11.2016.8.14.4071" />
-              <button id="process-search">🔎</button>
-            </div>
-            <div id="process-error" class="form-error" role="alert" style="display:none;"></div>
-            <div class="kpi-list kpi-sample">
-              <div>Ex: 1 Jane Doe</div>
-              <div>Ex: 2 2407408-69.2024.8.11.3117</div>
-            </div>
-          </div>
-          <div class="panel-box">
-            <h3>KPIs de Inteligência</h3>
+            <h3>Panorama Estatístico Judicial (BI)</h3>
             <div class="kpi-list" id="kpi-cities"></div>
           </div>
           <div class="panel-box">
-            <h3>Estados com maior volume</h3>
+            <h3>Ranking Top 5 (Estados e Cidades)</h3>
             <div class="kpi-list" id="kpi-states"></div>
           </div>
         </aside>
@@ -792,11 +984,8 @@
         <div class="loading-text">Buscando informações...</div>
       </div>
     </div>
-    <script src="/static/vendor/leaflet/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-      const sessionId = `SES-${Math.random().toString(36).slice(2, 10).toUpperCase()}`
-      document.getElementById("session-id").textContent = sessionId
-
       // View Sections
       const mapView = document.getElementById("map-view")
       const catalogView = document.getElementById("catalog-view")
@@ -806,7 +995,7 @@
       const filterState = document.getElementById("filter-state")
       const filterCity = document.getElementById("filter-city")
       const cityLoader = document.getElementById("city-loader")
-      const filterType = document.getElementById("filter-type")
+      const searchMode = document.getElementById("search-mode")
       const filterTerm = document.getElementById("filter-term")
       const btnFilter = document.getElementById("btn-filter")
       const catalogError = document.getElementById("catalog-error")
@@ -819,15 +1008,9 @@
       
       let currentPage = 1
 
-      // Map Elements
-      const mapTerm = document.getElementById("map-term")
-      
       // KPI Elements
       const kpiCities = document.getElementById("kpi-cities")
       const kpiStates = document.getElementById("kpi-states")
-      const processQuery = document.getElementById("process-query")
-      const processSearch = document.getElementById("process-search")
-      const processError = document.getElementById("process-error")
 
       // Overlay Elements
       const modalOverlay = document.getElementById("modal-overlay")
@@ -837,9 +1020,15 @@
 
       let mapInstance = null
       let layerNews = null
-      let layerJudicial = null
-      let layerMixed = null
       let latestCatalog = []
+      const REGION_TO_STATES = {
+        norte: ["AC", "AP", "AM", "PA", "RO", "RR", "TO"],
+        nordeste: ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
+        "centro-oeste": ["DF", "GO", "MT", "MS"],
+        centrooeste: ["DF", "GO", "MT", "MS"],
+        sudeste: ["ES", "MG", "RJ", "SP"],
+        sul: ["PR", "RS", "SC"]
+      }
 
       // --- View Navigation ---
       function switchView(viewName) {
@@ -847,14 +1036,20 @@
         document.getElementById(`${viewName}-view`).classList.add('active') 
 
         // Update Buttons State (Optional visual feedback)
-        document.getElementById("open-map").classList.toggle("primary", viewName === 'map')
-        document.getElementById("open-catalog").classList.toggle("primary", viewName === 'catalog')
-        document.getElementById("open-analysis").classList.toggle("primary", viewName === 'analysis')
-
+        if (document.getElementById("open-map")) {
+            document.getElementById("open-map").classList.remove("primary") 
+            if (viewName === 'map') document.getElementById("open-map").classList.add("primary")
+        }
+        if (document.getElementById("open-catalog")) {
+            document.getElementById("open-catalog").classList.remove("primary")
+            if (viewName === 'catalog') document.getElementById("open-catalog").classList.add("primary")
+        }
         if (viewName === 'map') {
             setTimeout(() => {
                 if (mapInstance) mapInstance.invalidateSize()
             }, 100)
+        } else if (viewName === 'catalog' && latestCatalog.length === 0) {
+            fetchCatalogData()
         }
       }
 
@@ -886,6 +1081,28 @@
         return cleaned.replace(/\s+/g, " ").trim()
       }
 
+      function normalizeRegion(value) {
+        return normalizeTerm(value || "").toLowerCase().replace(/\s+/g, "")
+      }
+
+      function getRegionStates(value) {
+        const normalized = normalizeRegion(value)
+        return REGION_TO_STATES[normalized] || []
+      }
+
+      function applySearchModePlaceholder() {
+        const mode = searchMode.value
+        const placeholders = {
+          general: "Buscar por termo livre",
+          name: "Nome da pessoa ou organização",
+          news: "Título ou assunto da notícia",
+          city: "Nome da cidade",
+          region: "Ex: Norte, Nordeste, Sudeste...",
+          state: "UF (ex: SP) ou nome do estado"
+        }
+        filterTerm.placeholder = placeholders[mode] || "Buscar..."
+      }
+
       function getCityCacheKey(uf) {
         return `cities:${uf}`
       }
@@ -915,6 +1132,12 @@
         modalOverlay.setAttribute("aria-hidden", "true")
       }
 
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) {
+          closeModal()
+        }
+      })
+
       async function copyProcessId(value) {
         if (!value || value === "-") return
         try {
@@ -938,33 +1161,179 @@
         requestAnimationFrame(() => {
           const modalRect = modalContent.getBoundingClientRect()
           const padding = 20
-          const maxTop = Math.max(padding, window.innerHeight - modalRect.height - padding)
-          const maxLeft = Math.max(padding, window.innerWidth - modalRect.width - padding)
-          const top = Math.min(Math.max(rect.top, padding), maxTop)
-          const left = Math.min(Math.max(rect.left, padding), maxLeft)
+          
+          const viewportWidth = window.innerWidth
+          const viewportHeight = window.innerHeight
+          
+          const cardCenterX = rect.left + rect.width / 2
+          const cardCenterY = rect.top + rect.height / 2
+          
+          const isLeftSide = cardCenterX < viewportWidth / 2
+          const isTopSide = cardCenterY < viewportHeight / 2
+          
+          let top, left
+          
+          const modalWidth = Math.min(760, viewportWidth - padding * 2)
+          const modalHeight = Math.min(600, viewportHeight - padding * 2)
+          
+          if (isTopSide) {
+            top = rect.bottom + padding
+            if (top + modalHeight > viewportHeight - padding) {
+              top = rect.top - modalHeight - padding
+            }
+          } else {
+            top = rect.top - modalHeight - padding
+            if (top < padding) {
+              top = rect.bottom + padding
+            }
+          }
+          
+          if (isLeftSide) {
+            left = rect.left
+            if (left + modalWidth > viewportWidth - padding) {
+              left = viewportWidth - modalWidth - padding
+            }
+          } else {
+            left = rect.right - modalWidth
+            if (left < padding) {
+              left = padding
+            }
+          }
+          
+          top = Math.max(padding, Math.min(top, viewportHeight - modalHeight - padding))
+          left = Math.max(padding, Math.min(left, viewportWidth - modalWidth - padding))
+          
           modalContent.style.top = `${top}px`
           modalContent.style.left = `${left}px`
+          modalContent.style.width = `${modalWidth}px`
+          modalContent.style.maxHeight = `${viewportHeight - padding * 2}px`
+          modalContent.style.overflow = 'auto'
         })
       }
 
+      function generateStorytelling(item, itemType) {
+        const title = item.title || item.classe || "Caso"
+        const snippet = item.snippet || item.assunto || ""
+        const city = item.city || "Local não especificado"
+        const state = item.state || ""
+        const source = item.source || item.tribunal || "Fonte"
+        const published = item.published_date || item.data_distribuicao || ""
+        
+        const location = state ? `${city} - ${state}` : city
+        
+        const formatDate = (dateStr) => {
+          if (!dateStr) return "Data não disponível"
+          try {
+            const date = new Date(dateStr)
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+          } catch {
+            return dateStr
+          }
+        }
+        
+        const extractKeywords = (text) => {
+          const keywords = ['estupro', 'abuso', 'sexual', 'violência', 'exploração', 'tráfico', 'pedofilia', 'pornografia', 'assedio', 'aliciamento', 'vulnerável', 'incapaz', 'menor', 'infantil', 'crime', 'condenação', 'prisão', 'flagrante', 'investigação', 'operação', 'polícia']
+          return keywords.filter(kw => text.toLowerCase().includes(kw))
+        }
+        
+        const keywords = extractKeywords(snippet)
+        
+        const generateNarrative = () => {
+          let narrative = `<p><strong>RELATÓRIO JORNALÍSTICO</strong></p>`
+          narrative += `<p>${title}</p>`
+          
+          if (itemType === "news") {
+            narrative += `<p>Um caso de <strong>${keywords.slice(0, 2).join(' e ')}</strong> foi registrado em <strong>${location}</strong>.</p>`
+            
+            if (snippet) {
+              narrative += `<p><em>${snippet.substring(0, 300)}${snippet.length > 300 ? '...' : ''}</em></p>`
+            }
+            
+            narrative += `<p>A informação foi publicada por <strong>${source}</strong>${published ? ` em ${formatDate(published)}` : ''}.</p>`
+            
+            if (state) {
+              narrative += `<p>Este casoJoinville添加到集合发生在 <strong>${state}</strong>, região que tem registrado diversos casos relacionados a crimes sexuais.</p>`
+            }
+            
+            narrative += `<p>O caso destaca a necessidade de <strong>proteção às vítimas</strong> e o combate a crimes sexuais na região.</p>`
+          } else {
+            const processNumber = item.processo || item.numero_processo || "-"
+            const status = item.status || "Em tramitação"
+            const court = item.vara || item.foro || "Tribunal"
+            
+            narrative += `<p>Processo judicial <strong>${processNumber}</strong> em trâmite em <strong>${location}</strong>.</p>`
+            narrative += `<p><strong>Natureza:</strong> ${item.classe || item.assunto || 'Não especificada'}</p>`
+            narrative += `<p><strong>Foro:</strong> ${court}</p>`
+            narrative += `<p><strong>Status:</strong> ${status}</p>`
+            
+            if (snippet) {
+              narrative += `<p><em>${snippet.substring(0, 300)}${snippet.length > 300 ? '...' : ''}</em></p>`
+            }
+          }
+          
+          return narrative
+        }
+        
+        return generateNarrative()
+      }
+
       function openModal(item, trigger) {
-        const parties = Array.isArray(item.partes) ? item.partes : []
-        const autor = parties.find((p) => String(p.tipo || "").toLowerCase().includes("autor"))
-        const reu = parties.find((p) => String(p.tipo || "").toLowerCase().includes("réu") || String(p.tipo || "").toLowerCase().includes("reu"))
+        const rawParties = item.partes || item.partes || []
+        const parties = Array.isArray(rawParties) ? rawParties : []
+        const autor = parties.find((p) => String(p.tipo || p.role || "").toLowerCase().includes("autor"))
+        const reu = parties.find((p) => {
+          const role = String(p.tipo || p.role || "").toLowerCase()
+          return role.includes("réu") || role.includes("reu") || role.includes("passivo")
+        })
         const processNumber = item.processo || item.numero_processo || item.id || "-"
         const tribunal = item.tribunal || item.source || "Tribunal de Justiça"
-        const cityState = `${item.city || "Nacional"} ${item.state || ""}`.trim()
-        const geoQuery = [item.vara, item.foro, item.city, item.state].filter(Boolean).join(" ")
-        const geoLink = geoQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoQuery)}` : ""
+        const itemType = item.type || (item.url ? "news" : "judicial")
+        const city = item.city || ""
+        const state = item.state || ""
+        const cityState = `${city || "Nacional"} ${state || ""}`.trim()
         
-        const detailBlocks = [
-          { label: "Assunto", value: item.assunto || item.snippet || "-" },
-          { label: "Vara", value: item.vara || item.foro || "-" },
-          { label: "Envolvidos", value: `Autor: ${autor?.nome || "-"} | Réu: ${reu?.nome || "-"}` },
-          { label: "Geolocalização", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">${cityState || "Abrir mapa"}</a>` : cityState || "-" },
-          { label: "Classe", value: item.classe || item.title || "-" },
-          { label: "Processo", value: processNumber }
-        ]
+        const cityQuery = city && state ? `${city}, ${state}, Brasil` : (city ? `${city}, Brasil` : (state ? `${state}, Brasil` : "Brasil"))
+        const geoLink = cityQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cityQuery)}` : ""
+        
+        const published = item.published_date || item.data_distribuicao || item.created_at || "-"
+        const status = item.status || item.situacao || "-"
+        const movements = Array.isArray(item.movimentacoes) ? item.movimentacoes : []
+        const movementPreview = movements.slice(0, 5).map((mv, index) => {
+          const date = mv?.data || mv?.date || "-"
+          const content = mv?.conteudo || mv?.content || "-"
+          return `${index + 1}. ${date} - ${content}`
+        }).join("<br/>") || "-"
+        const partiesText = parties.slice(0, 10).map((p) => {
+          const role = p?.tipo || p?.role || "Parte"
+          const name = p?.nome || p?.name || "-"
+          return `${role}: ${name}`
+        }).join("<br/>") || (typeof rawParties === "string" ? rawParties : "-")
+        
+        const storytelling = generateStorytelling(item, itemType)
+        
+        const detailBlocks = itemType === "news"
+          ? [
+              { label: "Fonte", value: item.source || "-" },
+              { label: "Data da Publicação", value: published || "-" },
+              { label: "Local do Fato", value: cityState || "-" },
+              { label: "Ver no Mapa", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">📍 ${cityQuery}</a>` : cityState || "-" }
+            ]
+          : [
+              { label: "Processo", value: processNumber },
+              { label: "Classe", value: item.classe || item.title || "-" },
+              { label: "Assunto", value: item.assunto || item.snippet || "-" },
+              { label: "Tribunal", value: tribunal || "-" },
+              { label: "Vara/Foro", value: item.vara || item.foro || "-" },
+              { label: "Juiz", value: item.juiz || item.judge || "-" },
+              { label: "Status", value: status || "-" },
+              { label: "Data de Distribuição", value: item.data_distribuicao || item.published_date || "-" },
+              { label: "Última Movimentação", value: item.data_ultima_movimentacao || "-" },
+              { label: "Local", value: cityState || "-" },
+              { label: "Ver no Mapa", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">📍 ${cityQuery}</a>` : cityState || "-" }
+            ]
+
+        const sourceUrl = item.url || ""
+        const displayUrl = sourceUrl.length > 60 ? sourceUrl.substring(0, 60) + "..." : sourceUrl
 
         modalContent.innerHTML = `
           <div class="modal-header">
@@ -978,6 +1347,9 @@
             <span class="tag">ID: ${processNumber}</span>
             <button type="button" id="copy-process">Copiar ID</button>
           </div>
+          <div class="storytelling-box">
+            ${storytelling}
+          </div>
           <div class="detail-grid">
             ${detailBlocks.map(block => `
                 <div class="detail-box">
@@ -985,7 +1357,7 @@
                   <div>${block.value}</div>
                 </div>`).join("")}
           </div>
-          ${item.url ? `<div class="detail-box"><strong>Fonte</strong><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.url}</a></div>` : ""}
+          ${item.url ? `<div class="detail-box source-link-box"><strong>🗞️ Acessar Fonte Original</strong><a href="${item.url}" target="_blank" rel="noopener noreferrer" class="source-link">🔗 ${displayUrl}</a></div>` : ""}
         `
         
         modalContent.querySelector("#modal-close").addEventListener("click", closeModal)
@@ -999,11 +1371,7 @@
       // --- Catalog Rendering ---
       function mapSearchPayload(payload) {
         const items = []
-        const results = Array.isArray(payload?.results) ? payload.results : []
         const news = Array.isArray(payload?.news) ? payload.news : []
-        results.forEach((item) => {
-          items.push({ ...item, type: "judicial" })
-        })
         news.forEach((item) => {
           items.push({ ...item, type: "news" })
         })
@@ -1077,7 +1445,8 @@
       }
 
       function renderCatalog(items) {
-        const uniqueItems = dedupeItems(items)
+        const onlyNews = (Array.isArray(items) ? items : []).filter((item) => (item?.type || (item?.url ? "news" : "judicial")) === "news")
+        const uniqueItems = dedupeItems(onlyNews)
         catalogGrid.innerHTML = ""
         if (uniqueItems.length === 0) {
             catalogGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">Nenhum registro encontrado para os filtros selecionados.</div>`
@@ -1089,13 +1458,18 @@
           card.className = "card"
           const isNews = item.type === "news"
           const thumbStyle = item.image_url ? `style="background-image:url('${item.image_url}')"` : ""
+          const iconEmoji = isNews ? "📰" : "⚖️"
+          const locationText = item.state ? (item.city ? `${item.city} - ${item.state}` : item.state) : "Nacional"
           
           card.innerHTML = `
-            <div class="card-thumb" ${thumbStyle}>${isNews ? "📰" : "⚖️"}</div>
+            <div class="card-thumb" ${thumbStyle}>
+              ${!item.image_url ? iconEmoji : ''}
+              <span class="card-badge">${isNews ? 'Notícia' : 'Judicial'}</span>
+            </div>
             <div class="card-body">
               <div class="card-meta">
-                <span>${item.source || item.tribunal || "TJ"}</span>
-                <span>${item.city || "Nacional"} ${item.state || ""}</span>
+                <span class="source">${item.source || item.tribunal || 'TJ'}</span>
+                <span>${locationText}</span>
               </div>
               <div class="card-title">${item.title || item.classe || "Processo Judicial"}</div>
               <div class="card-snippet">${item.snippet || item.assunto || "Sem descrição"}</div>
@@ -1115,40 +1489,51 @@
 
       // --- Data Fetching ---
       async function fetchAnalysisData() {
-        toggleLoading(true, "Gerando análise profunda...")
+        console.log("fetchAnalysisData called")
+        toggleLoading(true, "Gerando storytelling e BI judicial...")
         try {
           const params = new URLSearchParams()
-          if (filterState.value) params.append("state", filterState.value)
-          if (filterCity.value) params.append("city", filterCity.value)
-          if (filterTerm.value) params.append("term", filterTerm.value)
+          if (filterState.value) params.append("state", filterState.value) 
+          if (filterCity.value) params.append("city", filterCity.value)    
+          if (filterTerm.value) params.append("term", filterTerm.value)    
 
-          const res = await fetch(`/api/v1/search/analyze?${params}`)
+          console.log("Fetching analysis with params:", params.toString())
+          const res = await fetch(`/api/v1/search/analyze?${params}`)      
+          console.log("Analysis fetch response status:", res.status)
+          
           if (!res.ok) throw new Error("Erro ao buscar análise")
           const data = await res.json()
-          
+          console.log("Analysis data received:", data)
+
           if (data.status === "success") {
               // Convert markdown-like syntax to basic HTML
-              let htmlContent = data.analysis
-                  .replace(/#### (.*?)\n/g, '<h3>$1</h3>')
-                  .replace(/### (.*?)\n/g, '<h2>$1</h2>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/- (.*?)\n/g, '<li>$1</li>')
-                  .replace(/<\/li><li>/g, '</li>\n<li>')
+              let htmlContent = data.analysis || ""
+              htmlContent = htmlContent
+                  .replace(/#### (.*?)\n/g, '<h3 style="color: #ff4bd8; margin-top: 20px;">$1</h3>')
+                  .replace(/### (.*?)\n/g, '<h2 style="color: #fff; margin-bottom: 15px;">$1</h2>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fff;">$1</strong>')
+                  .replace(/- (.*?)(?=\n|$)/g, '<li style="margin-bottom: 8px;">$1</li>')
+                  .replace(/<\/li><li/g, '</li>\n<li')
+                  .replace(/\n/g, '<br>')
                   
               // Wrap list items in ul
-              htmlContent = htmlContent.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+              htmlContent = htmlContent.replace(/(<li.*?<\/li>)/gs, '<ul style="padding-left: 20px;">$1</ul>')
+              htmlContent = htmlContent.replace(/<\/ul><br><ul.*?>/g, '') // remove extra uls
               
               document.getElementById("analysis-content").innerHTML = `
-                  <div style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                      <strong>Resumo do Dataset:</strong> ${data.total_lawsuits} processos e ${data.total_news} notícias analisadas.
+                  <div style="margin-bottom: 25px; padding: 18px; background: rgba(255,255,255,0.05); border-radius: 10px; border-left: 4px solid #ff4bd8;">
+                      <strong style="color: #fff; font-size: 16px;">Resumo da Apuração:</strong><br> 
+                      A narrativa consolidou <span style="color: #ff4bd8; font-weight: bold;">${data.total_news} notícias</span> e utilizou <span style="color: #ff4bd8; font-weight: bold;">${data.total_lawsuits} processos</span> apenas no nível macro para BI.
                   </div>
-                  ${htmlContent}
+                  <div style="background: rgba(10, 10, 14, 0.5); padding: 20px; border-radius: 10px; border: 1px solid var(--border);">
+                      ${htmlContent}
+                  </div>
               `
           } else {
               document.getElementById("analysis-content").innerHTML = "Erro ao gerar análise."
           }
         } catch (err) {
-          console.error(err)
+          console.error("fetchAnalysisData error:", err)
           document.getElementById("analysis-content").innerHTML = "Erro de conexão ao buscar análise."
         } finally {
           toggleLoading(false)
@@ -1162,12 +1547,13 @@
 
         try {
             setError(catalogError, "")
-            const sourceType = filterType.value
+            const mode = searchMode.value
             const rawTerm = filterTerm.value.trim()
             const term = normalizeTerm(rawTerm)
-            const state = filterState.value
-            const city = filterCity.value
+            let state = filterState.value
+            let city = filterCity.value
             const limit = filterLimit.value
+            const regionStates = mode === "region" ? getRegionStates(term) : []
 
             if (rawTerm && term.length < 2) {
                 setError(catalogError, "Informe ao menos 2 caracteres para buscar.")
@@ -1176,13 +1562,16 @@
             if (rawTerm && term !== rawTerm) {
                 setError(catalogError, "Caracteres inválidos foram removidos da busca.")
             }
+
+            if (mode === "city" && term && !city) city = term.toUpperCase()
+            if (mode === "state" && term && !state) state = term.toUpperCase().slice(0, 2)
             
             const params = new URLSearchParams({ 
-                source_type: sourceType, 
+                source_type: "news", 
                 limit: limit,
                 page: currentPage.toString()
             })
-            if (term) params.append("term", term)
+            if (term && !["state", "city"].includes(mode)) params.append("term", term)
             if (state) params.append("state", state)
             if (city) params.append("city", city)
             
@@ -1193,7 +1582,10 @@
             
             const data = await response.json()
             const items = Array.isArray(data) ? data : []
-            const uniqueItems = dedupeItems(items)
+            let uniqueItems = dedupeItems(items)
+            if (mode === "region" && regionStates.length) {
+              uniqueItems = uniqueItems.filter((item) => regionStates.includes(String(item.state || "").toUpperCase()))
+            }
             
             latestCatalog = uniqueItems
             renderCatalog(uniqueItems)
@@ -1277,28 +1669,52 @@
       }
 
       async function fetchKpis() {
-        const term = mapTerm.value.trim()
-        const params = new URLSearchParams({ limit: "5" })
+        const params = new URLSearchParams()
+        if (filterState.value) params.append("state", filterState.value)
+        if (filterCity.value) params.append("city", filterCity.value)
+        const term = normalizeTerm(filterTerm.value.trim())
         if (term) params.append("term", term)
         
         try {
-            const response = await fetch(`/api/v1/stats/kpi?${params.toString()}`)
+            const response = await fetch(`/api/v1/search/analyze?${params.toString()}`)
             if (!response.ok) return
             const data = await response.json()
+            const bi = data?.judicial_bi || {}
             
             kpiCities.innerHTML = ""
             kpiStates.innerHTML = ""
-            
-            ;(data.top_cities_overall || []).forEach((item) => {
+
+            const nationalItem = document.createElement("div")
+            nationalItem.className = "kpi-item"
+            nationalItem.innerHTML = `<span>Processos Judiciais</span><strong>${bi.total_national || 0}</strong>`
+            kpiCities.appendChild(nationalItem)
+
+            if (bi.unknown_state_cases) {
+              const unknown = document.createElement("div")
+              unknown.className = "kpi-item"
+              unknown.innerHTML = `<span>Sem UF classificada</span><strong>${bi.unknown_state_cases}</strong>`
+              kpiCities.appendChild(unknown)
+            }
+
+            ;(bi.regional_distribution || []).forEach((item) => {
               const div = document.createElement("div")
               div.className = "kpi-item"
-              div.innerHTML = `<span>${item.name}</span><strong>${item.value}</strong>`
+              div.innerHTML = `<span>${item.region}</span><strong>${item.count} (${item.percent}%)</strong>`
               kpiCities.appendChild(div)
             })
-            ;(data.top_states_overall || []).forEach((item) => {
+
+            const topStates = (bi.state_ranking || []).slice(0, 5)
+            const topCities = (bi.municipal_focus || []).filter((item) => item.state && item.state !== "NA").slice(0, 5)
+            topStates.forEach((item, idx) => {
               const div = document.createElement("div")
               div.className = "kpi-item"
-              div.innerHTML = `<span>${item.name}</span><strong>${item.value}</strong>`
+              div.innerHTML = `<span>Estado #${idx + 1} - ${item.state}</span><strong>${item.count}</strong>`
+              kpiStates.appendChild(div)
+            })
+            topCities.forEach((item, idx) => {
+              const div = document.createElement("div")
+              div.className = "kpi-item"
+              div.innerHTML = `<span>Cidade #${idx + 1} - ${item.city}/${item.state}</span><strong>${item.count}</strong>`
               kpiStates.appendChild(div)
             })
         } catch (e) { console.error(e) }
@@ -1317,8 +1733,6 @@
           attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
         }).addTo(mapInstance)
         layerNews = L.layerGroup().addTo(mapInstance)
-        layerJudicial = L.layerGroup().addTo(mapInstance)
-        layerMixed = L.layerGroup().addTo(mapInstance)
       }
 
       function markerIcon(type) {
@@ -1330,35 +1744,15 @@
         })
       }
 
-      function syncLayers() {
-        const showNews = document.getElementById("layer-news").checked
-        const showJudicial = document.getElementById("layer-judicial").checked
-        if (showNews) mapInstance.addLayer(layerNews)
-        else mapInstance.removeLayer(layerNews)
-        if (showJudicial) mapInstance.addLayer(layerJudicial)
-        else mapInstance.removeLayer(layerJudicial)
-        if (showNews && showJudicial) mapInstance.addLayer(layerMixed)
-        else mapInstance.removeLayer(layerMixed)
-      }
-      
-      function syncLayerLabel(inputId) {
-        const input = document.getElementById(inputId)
-        const label = input.closest("label").querySelector("span")
-        if (input.checked) {
-          label.classList.remove("opacity-40", "line-through")
-        } else {
-          label.classList.add("opacity-40", "line-through")
-        }
-      }
-
       async function fetchGeo() {
         ensureMap()
         layerNews.clearLayers()
-        layerJudicial.clearLayers()
-        layerMixed.clearLayers()
-        const term = mapTerm.value.trim()
+        const term = normalizeTerm(filterTerm.value.trim())
         const params = new URLSearchParams()
+        params.append("source_type", "news")
         if (term) params.append("term", term)
+        if (filterState.value) params.append("state", filterState.value)
+        if (filterCity.value) params.append("city", filterCity.value)
         
         try {
             const response = await fetch(`/api/v1/stats/geo?${params.toString()}`)
@@ -1368,22 +1762,23 @@
             data.forEach((point) => {
               if (!point.lat || !point.lng) return
               const type = point.type || "news"
+              if (type !== "news") return
               const marker = L.marker([point.lat, point.lng], { icon: markerIcon(type) })
               marker.bindPopup(`
                 <div style="font-size:12px;">
                   <strong>${point.city} (${point.state})</strong><br/>
                   ${point.count} Ocorrências<br/>
-                  ${type === "news" ? "Mídia/Imprensa" : type === "judicial" ? "Judicial" : "Misto"}
+                  Mídia/Imprensa
                   <div style="margin-top:8px;">
                     <button onclick="window.filterByRegion('${point.city}','${point.state}')" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);background:#1b1b24;color:#fff;cursor:pointer;">VER CASOS DESTA REGIÃO</button>
                   </div>
                 </div>
-              `)
-              if (type === "news") layerNews.addLayer(marker)
-              else if (type === "judicial") layerJudicial.addLayer(marker)
-              else layerMixed.addLayer(marker)
+              `, { autoPan: true, keepInView: true, autoPanPadding: [80, 80] })
+              marker.on("click", () => {
+                mapInstance.panTo([point.lat, point.lng], { animate: true })
+              })
+              layerNews.addLayer(marker)
             })
-            syncLayers()
         } catch(e) { console.error(e) }
       }
 
@@ -1391,21 +1786,22 @@
         filterState.value = state
         await populateCities(state)
         filterCity.value = city
+        searchMode.value = "city"
+        filterTerm.value = city
         switchView('catalog')
         await fetchCatalogData()
+        await fetchKpis()
       }
 
       // --- Event Listeners ---
       document.getElementById("open-map").addEventListener("click", () => switchView('map'))
       document.getElementById("open-catalog").addEventListener("click", () => switchView('catalog'))
-      document.getElementById("open-analysis").addEventListener("click", () => {
-          switchView('analysis')
-          fetchAnalysisData()
-      })
 
       btnFilter.addEventListener("click", () => {
           currentPage = 1
           fetchCatalogData()
+          fetchGeo()
+          fetchKpis()
       })
       
       filterLimit.addEventListener("change", () => {
@@ -1425,113 +1821,45 @@
           fetchCatalogData()
       })
       
-      filterType.addEventListener("change", () => {
+      searchMode.addEventListener("change", () => {
+          applySearchModePlaceholder()
           currentPage = 1
           fetchCatalogData()
+          fetchGeo()
+          fetchKpis()
       })
       
       filterState.addEventListener("change", async () => {
         currentPage = 1
         await populateCities(filterState.value)
         fetchCatalogData()
+        fetchKpis()
+        fetchGeo()
       })
       
       filterCity.addEventListener("change", () => {
           currentPage = 1
           fetchCatalogData()
+          fetchKpis()
+          fetchGeo()
       })
 
       filterTerm.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
               currentPage = 1
               fetchCatalogData()
+              fetchKpis()
+              fetchGeo()
           }
       })
       filterTerm.addEventListener("input", () => setError(catalogError, ""))
-
-      document.getElementById("layer-news").addEventListener("change", () => {
-        syncLayerLabel("layer-news")
-        syncLayers()
-      })
-      document.getElementById("layer-judicial").addEventListener("change", () => {
-        syncLayerLabel("layer-judicial")
-        syncLayers()
-      })
-
-      processQuery.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") processSearch.click()
-      })
-      processQuery.addEventListener("input", () => setError(processError, ""))
-
-      processSearch.addEventListener("click", async () => {
-        const rawValue = processQuery.value.trim()
-        const value = normalizeTerm(rawValue)
-        if (!rawValue) {
-          setError(processError, "Informe um número de processo ou termo válido.")
-          return
-        }
-        if (value.length < 3) {
-          setError(processError, "Informe pelo menos 3 caracteres.")
-          return
-        }
-        if (rawValue !== value) {
-          setError(processError, "Caracteres inválidos foram removidos da consulta.")
-        } else {
-          setError(processError, "")
-        }
-        
-        toggleLoading(true, "Estamos buscando em nossa base, aguarde só mais um momento.")
-        try {
-            let localData = null
-            try {
-              const localResponse = await fetch(`/api/v1/search/local?query=${encodeURIComponent(value)}`)
-              if (localResponse.ok) {
-                localData = await localResponse.json()
-              }
-            } catch (e) {}
-
-            if (localData) {
-              const localCount = applySearchResults(localData)
-              if (localCount > 0) {
-                await fetchKpis()
-                await fetchGeo()
-                switchView('catalog')
-                return
-              }
-            }
-
-            setLoadingText("Não temos esse processo ainda, vamos buscar externo.")
-            const response = await fetch(`/api/v1/search?query=${encodeURIComponent(value)}`)
-            if (!response.ok) throw new Error("Erro na busca")
-
-            const data = await response.json()
-            const totalCount = applySearchResults(data)
-            if (totalCount === 0) {
-              setError(processError, "Nenhum resultado encontrado.")
-            }
-            await fetchKpis()
-            await fetchGeo()
-            switchView('catalog')
-        } catch (e) {
-            console.error(e)
-            setError(processError, "Erro ao realizar busca. Tente novamente.")
-        } finally {
-            toggleLoading(false)
-        }
-      })
-
-      mapTerm.addEventListener("change", () => {
-        fetchGeo()
-        fetchKpis()
-      })
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") closeModal()
       })
 
       // --- Init ---
-      syncLayerLabel("layer-news")
-      syncLayerLabel("layer-judicial")
+      applySearchModePlaceholder()
       
       window.addEventListener("load", async () => {
         ensureMap()

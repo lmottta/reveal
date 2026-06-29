@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.db.session import SessionLocal
 from app.models.search import SearchResult, News, Search
+from app.models.lawsuit import Lawsuit
 import json
 import requests
 import unicodedata
@@ -58,7 +59,89 @@ def get_kpi_stats(term: str = None, limit: int = 5, db: Session = Depends(get_db
     tramitacao_days = []
     competencia_counts = {}
 
-    # 1. Processar Processos Judiciais
+    # 0. Processar Lawsuit (Base populada por RPA em massa)
+    lawsuits_query = db.query(Lawsuit).limit(5000)
+    
+    # Filtro básico de query para Lawsuit (se possível)
+    if term:
+        terms = parse_terms(term)
+        # Filtro em memória ou query complexa? 
+        # Vamos filtrar em memória para manter consistência com a lógica abaixo
+        pass 
+
+    lawsuits = lawsuits_query.all()
+
+    for law in lawsuits:
+        # Construir texto de busca
+        parties_txt = str(law.parties) if law.parties else ""
+        search_text = f"{law.cnj} {law.judge} {law.court} {law.class_type} {law.subject} {parties_txt}"
+        
+        if term:
+            terms = parse_terms(term)
+            if not any(t.upper() in search_text.upper() for t in terms):
+                continue
+                
+        if not is_relevant_content(search_text):
+            continue
+        
+        # Mapeamento de Estado
+        tribunal_clean = str(law.tribunal).split('+')[0].strip().upper()
+        
+        # Se já for sigla de estado (ex: SP, RJ), usa direto. Senão, tenta mapear (ex: TJSP -> SP)
+        if len(tribunal_clean) == 2 and tribunal_clean in STATE_COORDS:
+             state = tribunal_clean
+        else:
+             state = TRIBUNAL_TO_STATE.get(tribunal_clean, "BR")
+
+        # Mapeamento de Cidade (Tentativa simples baseada na Vara/Comarca)
+        city = "DESCONHECIDO"
+        if law.court:
+            parts = str(law.court).upper().split(" DE ")
+            if len(parts) > 1 and parts[-1].strip():
+                city = parts[-1].strip()
+            else:
+                city = str(law.court).upper().strip()
+        
+        # Incrementar contadores
+        total_judicial += 1
+        
+        # Resolução
+        situacao = (law.status or "").upper()
+        is_resolved = "ARQUIVADO" in situacao or "BAIXA" in situacao or "JULGADO" in situacao or "ENCERRADO" in situacao
+        if is_resolved:
+            resolved_count += 1
+        
+        # Tempo (Aproximado)
+        try:
+            if law.distribution_date:
+                # Tentar formatos comuns
+                dt_start = None
+                for fmt in ["%d/%m/%Y", "%Y-%m-%d", "%d/%m/%Y %H:%M:%S"]:
+                    try:
+                        dt_start = datetime.strptime(law.distribution_date, fmt)
+                        break
+                    except: pass
+                
+                if dt_start:
+                    dt_end = law.last_update.replace(tzinfo=None) if law.last_update else datetime.now()
+                    days = (dt_end - dt_start).days
+                    if days >= 0:
+                        tramitacao_days.append(days)
+        except: pass
+
+        # Competência
+        classe = (law.class_type or "OUTROS").upper()
+        competencia_counts[classe] = competencia_counts.get(classe, 0) + 1
+
+        display_state = state
+        city_key = f"{city} - {display_state}"
+        
+        city_counts[city_key] = city_counts.get(city_key, 0) + 1
+        state_counts[display_state] = state_counts.get(display_state, 0) + 1
+        state_judicial_counts[display_state] = state_judicial_counts.get(display_state, 0) + 1
+
+
+    # 1. Processar Processos Judiciais (SearchResult - Legado/Busca Manual)
     results = db.query(SearchResult, Search.tribunal).join(Search, SearchResult.search_id == Search.id).order_by(SearchResult.created_at.desc()).limit(5000).all()
     
     for row, tribunal in results:
@@ -141,7 +224,7 @@ def get_kpi_stats(term: str = None, limit: int = 5, db: Session = Depends(get_db
             # Incrementa contadores
             display_city = city
             if city == "DESCONHECIDO":
-                display_city = "INDETERMINADO"
+                display_city = "DESCONHECIDO"
             
             display_state = state
             if state == "BR":
@@ -170,7 +253,7 @@ def get_kpi_stats(term: str = None, limit: int = 5, db: Session = Depends(get_db
         
         display_city = city
         if city == "DESCONHECIDO":
-            display_city = "INDETERMINADO"
+            display_city = "DESCONHECIDO"
         
         display_state = state
         if state == "BR":
@@ -200,129 +283,167 @@ def get_kpi_stats(term: str = None, limit: int = 5, db: Session = Depends(get_db
     }
 
 @router.get("/geo")
-def get_geo_stats(term: str = None, max_news: int = 5000, max_judicial: int = 2000, db: Session = Depends(get_db)):
+def get_geo_stats(
+    term: str = None,
+    state: str = None,
+    city: str = None,
+    source_type: str = "judicial",
+    max_news: int = 5000,
+    max_judicial: int = 2000,
+    db: Session = Depends(get_db)
+):
     """
     Retorna estatísticas geográficas com filtro opcional por termo.
     """
     stats = {}
+    state_filter = state.upper() if state else None
+    city_filter = city.upper() if city else None
 
-    # 1. Processar Processos Judiciais (Join com Search para pegar Tribunal)
-    if not max_judicial or max_judicial < 1:
-        max_judicial = 2000
-    if max_judicial > 20000:
-        max_judicial = 20000
+    if source_type in ["all", "judicial"]:
+        lawsuits = db.query(Lawsuit).limit(5000).all()
         
-    results = db.query(SearchResult, Search.tribunal).join(Search, SearchResult.search_id == Search.id).order_by(SearchResult.created_at.desc()).limit(max_judicial).all()
-    
-    # Cidades conhecidas para heurística (expandido)
-    cidades_conhecidas = [k for k in COORDS.keys() if k != "DESCONHECIDO"]
-
-    # 1. Processar Processos Judiciais (Join com Search para pegar Tribunal)
-    # ... (código anterior mantido)
-
-    for row, search_obj in results: # search_obj é o objeto Search completo ou apenas a coluna tribunal? 
-                                   # A query é db.query(SearchResult, Search.tribunal) -> retorna tupla (SearchResult, tribunal_str)
-        tribunal = search_obj # Na verdade, a query retorna (SearchResult, str)
-
-        data = row.content
-        if not data or not isinstance(data, dict):
-             continue
-        
-        results_list = data.get("results", [])
-        if not results_list:
-            continue
-
-        # Determinar estado pelo tribunal (Base)
-        base_state = "BR"
-        if tribunal:
-            clean_tribunal = str(tribunal).split('+')[0].strip().upper()
-            base_state = TRIBUNAL_TO_STATE.get(clean_tribunal, "BR")
-
-        for item in results_list:
-            if not isinstance(item, dict):
-                continue
-
-            # CORREÇÃO DE INTEGRIDADE: Validar Tribunal pelo CNJ se disponível
-            unique_id = item.get("processo") or item.get("numero_processo") or ""
-            cnj_clean = re.sub(r"\D", "", unique_id)
-            if len(cnj_clean) == 20:
-                tr_id = cnj_clean[14:16]
-                correct_tribunal = CNJ_CODE_MAP.get(tr_id)
-                if correct_tribunal:
-                    item["tribunal"] = correct_tribunal
-                    base_state = TRIBUNAL_TO_STATE.get(correct_tribunal, base_state)
-
-            # Tenta pegar cidade/estado do próprio item primeiro
-            item_city = item.get("city")
-            item_state = item.get("state")
+        for law in lawsuits:
+            parties_txt = str(law.parties) if law.parties else ""
+            search_text = f"{law.cnj} {law.judge} {law.court} {law.class_type} {law.subject} {parties_txt}"
             
-            found_city = "DESCONHECIDO"
-            found_state = base_state
-
-            if item_city:
-                found_city = item_city.upper()
-            
-            if item_state:
-                found_state = item_state.upper()
-            
-            # Se não achou cidade explícita, tenta inferir de outros campos
-            if found_city == "DESCONHECIDO":
-                # Concatena campos úteis para busca
-                desc = f"{item.get('descricao', '')} {item.get('foro', '')} {item.get('comarca', '')} {item.get('tribunal', '')}".upper()
-                
-                for city in cidades_conhecidas:
-                    if f" {city}" in f" {desc} " or f"DE {city}" in desc or f"COMARCA DE {city}" in desc:
-                        found_city = city
-                        break
-            
-            search_text = f"{item.get('descricao', '')} {item.get('assunto', '')} {item.get('classe', '')} {found_city}"
-            terms = parse_terms(term)
-            if terms and not any(t.upper() in search_text.upper() for t in terms):
-                continue
+            if term:
+                terms = parse_terms(term)
+                if not any(t.upper() in search_text.upper() for t in terms):
+                    continue
+                    
             if not is_relevant_content(search_text):
                 continue
-
-            key = f"{found_city}|{found_state}"
             
-            if key not in stats:
-                stats[key] = {"city": found_city, "state": found_state, "count": 0, "type": "judicial"}
+            tribunal_clean = str(law.tribunal).split('+')[0].strip().upper()
+            if len(tribunal_clean) == 2 and tribunal_clean in STATE_COORDS:
+                 state = tribunal_clean
             else:
-                # Se já existe e era news, vira mixed. Se era judicial, mantém.
-                if stats[key]["type"] == "news":
-                    stats[key]["type"] = "mixed"
+                 state = TRIBUNAL_TO_STATE.get(tribunal_clean, "NA")
+
+            city = "DESCONHECIDO"
+            if law.court:
+                parts = str(law.court).upper().split(" DE ")
+                if len(parts) > 1 and parts[-1].strip():
+                    city = parts[-1].strip()
+                else:
+                    city = str(law.court).upper().strip()
             
+            key = f"{city}|{state}"
+            if state_filter and state != state_filter:
+                continue
+            if city_filter and city != city_filter:
+                continue
+            if key not in stats:
+                stats[key] = {"city": city, "state": state, "count": 0, "type": "judicial"}
             stats[key]["count"] += 1
 
-    # 2. Processar Notícias
-    if not max_news or max_news < 1:
-        max_news = 5000
-    if max_news > 200000:
-        max_news = 200000
-    query = db.query(News.city, News.state, News.title, News.snippet).order_by(News.created_at.desc()).limit(max_news)
-    news_items = query.all()
-
-    for item in news_items:
-        text = f"{item.title or ''} {item.snippet or ''}"
-        terms = parse_terms(term)
-        if terms and not any(t.upper() in text.upper() for t in terms):
-            continue
-        if not is_relevant_content(text):
-            continue
-        city = item.city.upper() if item.city else "DESCONHECIDO"
-        state = item.state.upper() if item.state else "BR"
+    if source_type in ["all", "judicial"]:
+        if not max_judicial or max_judicial < 1:
+            max_judicial = 2000
+        if max_judicial > 20000:
+            max_judicial = 20000
+            
+        results = db.query(SearchResult, Search.tribunal).join(Search, SearchResult.search_id == Search.id).order_by(SearchResult.created_at.desc()).limit(max_judicial).all()
         
-        # Se cidade é desconhecida mas tem estado, tenta usar capital
-        if city == "DESCONHECIDO" and state in STATE_COORDS:
-            # Mantém cidade desconhecida mas vamos usar coords do estado
-            pass
+        cidades_conhecidas = [k for k in COORDS.keys() if k != "DESCONHECIDO"]
 
-        key = f"{city}|{state}"
-        if key not in stats:
-             stats[key] = {"city": city, "state": state, "count": 0, "type": "news"}
-        elif stats[key]["type"] == "judicial":
-             stats[key]["type"] = "mixed"
-        
-        stats[key]["count"] += 1
+        for row, search_obj in results:
+            tribunal = search_obj
+
+            data = row.content
+            if not data or not isinstance(data, dict):
+                 continue
+            
+            results_list = data.get("results", [])
+            if not results_list:
+                continue
+
+            base_state = "NA"
+            if tribunal:
+                clean_tribunal = str(tribunal).split('+')[0].strip().upper()
+                base_state = TRIBUNAL_TO_STATE.get(clean_tribunal, "NA")
+
+            for item in results_list:
+                if not isinstance(item, dict):
+                    continue
+
+                unique_id = item.get("processo") or item.get("numero_processo") or ""
+                cnj_clean = re.sub(r"\D", "", unique_id)
+                if len(cnj_clean) == 20:
+                    tr_id = cnj_clean[14:16]
+                    correct_tribunal = CNJ_CODE_MAP.get(tr_id)
+                    if correct_tribunal:
+                        item["tribunal"] = correct_tribunal
+                        base_state = TRIBUNAL_TO_STATE.get(correct_tribunal, base_state)
+
+                item_city = item.get("city")
+                item_state = item.get("state")
+                
+                found_city = "DESCONHECIDO"
+                found_state = base_state
+
+                if item_city:
+                    found_city = item_city.upper()
+                
+                if item_state:
+                    found_state = item_state.upper()
+                
+                if found_city == "DESCONHECIDO":
+                    desc = f"{item.get('descricao', '')} {item.get('foro', '')} {item.get('comarca', '')} {item.get('tribunal', '')}".upper()
+                    
+                    for city in cidades_conhecidas:
+                        if f" {city}" in f" {desc} " or f"DE {city}" in desc or f"COMARCA DE {city}" in desc:
+                            found_city = city
+                            break
+                
+                search_text = f"{item.get('descricao', '')} {item.get('assunto', '')} {item.get('classe', '')} {found_city}"
+                terms = parse_terms(term)
+                if terms and not any(t.upper() in search_text.upper() for t in terms):
+                    continue
+                if not is_relevant_content(search_text):
+                    continue
+
+                key = f"{found_city}|{found_state}"
+                if state_filter and found_state != state_filter:
+                    continue
+                if city_filter and found_city != city_filter:
+                    continue
+                
+                if key not in stats:
+                    stats[key] = {"city": found_city, "state": found_state, "count": 0, "type": "judicial"}
+                else:
+                    if stats[key]["type"] == "news":
+                        stats[key]["type"] = "mixed"
+                
+                stats[key]["count"] += 1
+
+    if source_type in ["all", "news"]:
+        if not max_news or max_news < 1:
+            max_news = 5000
+        if max_news > 200000:
+            max_news = 200000
+        query = db.query(News.city, News.state, News.title, News.snippet).order_by(News.created_at.desc()).limit(max_news)
+        news_items = query.all()
+
+        for item in news_items:
+            text = f"{item.title or ''} {item.snippet or ''}"
+            terms = parse_terms(term)
+            if terms and not any(t.upper() in text.upper() for t in terms):
+                continue
+            city = item.city.upper() if item.city else "DESCONHECIDO"
+            state = item.state.upper() if item.state else "NA"
+
+            key = f"{city}|{state}"
+            if state_filter and state != state_filter:
+                continue
+            if city_filter and city != city_filter:
+                continue
+            if key not in stats:
+                 stats[key] = {"city": city, "state": state, "count": 0, "type": "news"}
+            elif stats[key]["type"] == "judicial":
+                 stats[key]["type"] = "mixed"
+            
+            stats[key]["count"] += 1
 
     response = []
     for key, data in stats.items():
