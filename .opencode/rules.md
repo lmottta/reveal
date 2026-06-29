@@ -1,112 +1,97 @@
-# Regras de Desenvolvimento — Reveal (JuriPopular)
+# Rules — Reveal (JuriPopular)
 
-## 1. Convenções de Código
+## Engineering Loop
 
-### Python
-- **Versão:** Python 3.10+
-- **Formatação:** Seguir PEP 8
-- **Imports:** Ordem: standard library → third-party → local (separados por linha em branco)
-- **Type hints:** Obrigatórios em funções públicas
-- **Docstrings:** Google-style apenas para funções complexas (>15 linhas)
-- **Naming:** `snake_case` para funções/variáveis, `PascalCase` para classes, `UPPER_CASE` para constantes
-- **Comentários:** Evitar comentários óbvios. Comentar apenas "por quê", não "o quê"
-- **Max line length:** 120 caracteres
+Toda funcionalidade deve seguir o ciclo **Plan → Create → Execute → Test → Review**:
 
-### Frontend (HTML/CSS/JS)
-- **HTML:** Semântico, indentação 2 espaços
-- **CSS:** Variáveis CSS no `:root` para theming (dark mode), classes BEM-like
-- **JS:** ES6+, `const`/`let` (nunca `var`), async/await para promises
-- **Leaflet:** Inicialização via CDN, tiles OpenStreetMap
-
-### Git
-- **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`)
-- **Mensagens:** Português ou Inglês (manter consistência). Ex: `feat: adiciona exportação de relatórios`
-- **Branch:** `master` principal, features em branches separadas
-- **NUNCA** commitar: `.env`, `*.key`, `*.pem`, `venv/`, `__pycache__/`, `debug_*`
-- **SEMPRE** verificar `git status` e `git diff` antes de commitar
-
-## 2. Estrutura de Código
-
-### Backend (`backend/app/`)
 ```
-app/
-├── api/           # FastAPI routers e endpoints
-│   └── endpoints/ # Handlers de cada recurso
-├── core/          # Config, constants, utilities
-├── db/            # Database session e init
-├── middleware/    # Auth e outros middlewares
-├── models/        # SQLAlchemy models
-└── rpa/           # Robotic Process Automation
-    └── systems/   # RPAs por sistema judiciário
+┌─────────────────────────────────────────────────┐
+│                  ENGINEERING LOOP                │
+│   ┌──────┐   ┌──────┐   ┌──────┐   ┌──────┐   │
+│   │PLAN  │ → │CREATE│ → │EXECUTE│ → │TEST  │   │
+│   └──┬───┘   └──┬───┘   └──┬───┘   └──┬───┘   │
+│      └──────────↕──────────↕──────────┘        │
+│                     REVIEW                      │
+│                   (iterar/se necessário)         │
+└─────────────────────────────────────────────────┘
 ```
 
-### Regras para novos endpoints:
-1. Criar arquivo em `api/endpoints/` com named router
-2. Registrar em `api/api.py`
-3. Usar `Session` do SQLAlchemy como dependência (mesma `get_db` dos endpoints existentes)
+### 1. PLAN
+- Ler `context.md`, `specs.md` para entender o projeto
+- Verificar se já existe funcionalidade similar (evitar duplicação)
+- Definir critério de aceite: "como saber que está pronto?"
+- Mapear arquivos que serão criados/modificados
 
-### Regras para novos RPAs:
-1. Estender `rpa/base.py` (RPA interface) ou `rpa/systems/base_system.py` (sistema judiciário)
-2. Registrar em `rpa/config.py` (tribunal → RPA)
-3. Playwright headless obrigatório com anti-detection
+### 2. CREATE
+- Seguir convenções do projeto (Pydantic, SQLAlchemy, FastAPI)
+- Não duplicar código existente (endpoints, modelos, lógica)
+- Adicionar testes para novos endpoints/lógicas
+- Atualizar specs.md se mudar a API
 
-## 3. Qualidade e Testes
+### 3. EXECUTE
+```bash
+# Modo Docker (PostgreSQL)
+docker compose up --build -d
 
-- **SEMPRE** rodar testes antes de commitar:
-  ```bash
-  cd backend && python -m pytest tests/ -v
-  ```
-- **Novos recursos** devem ter testes correspondentes
-- **Testes unitários** em `backend/tests/` (unittest/pytest)
-- **Testes de sistema** em `scripts/test_system.py`
-- **E2E** em `scripts/e2e_test.py` (requer backend rodando)
+# Modo dev local (SQLite)
+cd backend
+$env:DATABASE_URL="sqlite:///reveal.db"
+uvicorn main:app --reload --port 8000
 
-## 4. Segurança
+# Pipeline individual
+cd backend
+python ../scripts/populate_lawsuits.py
+```
 
-- **NUNCA** expor `CAPTCHA_API_KEY` em logs ou responses
-- **CSP**: Manter Content-Security-Policy headers atualizados ao adicionar novos recursos (fonts, map tiles, etc.)
-- **CORS**: Configurar origins permitidas em `core/config.py`
-- **Auth**: Endpoints de escrita protegidos por JWT (ver `middleware/auth.py`)
-- **Dados sensíveis**: Nomes de partes/juízes não expostos na UI final
+### 4. TEST
+```bash
+# Rodar testes
+cd backend
+$env:DATABASE_URL="sqlite:///./test_reveal.db"
+python -m pytest tests/ -v
 
-## 5. RPA - Boas Práticas
+# Testar endpoint manual
+curl http://localhost:8000/api/v1/search/TJSP?query=teste&state=SP
 
-### Playwright
-- Sempre usar `headless=True` em produção
-- `user_agent` customizado (evitar `HeadlessChrome`)
-- `args=["--disable-blink-features=AutomationControlled"]`
-- Injetar script anti-detection: `navigator.webdriver === undefined`
-- `locale="pt-BR"` e `timezone="America/Sao_Paulo"`
+# Verificar health
+curl http://localhost:8000/health
+curl http://localhost:8000/diagnostics
+```
 
-### Rate Limiting
-- Delay aleatório entre ações: `random.uniform(0.5, 2.0)`
-- Typping humano simulado: `page.keyboard.type(text, delay=random.randint(50, 150))`
-- Timeouts: 15-60s por operação
+### 5. REVIEW
+- Testes passando? (16/16 obrigatório)
+- Lint/typecheck limpo?
+- Tech debt introduzido? (se sim, documentar)
+- Performance aceitável?
+- Segurança: sem expor dados sensíveis
+- Documentação atualizada? (context.md, specs.md se aplicável)
 
-### Erros
-- Tratar timeouts e mudanças de layout individualmente (não derrubar o sistema)
-- Log de erros sem expor dados sensíveis
-- Screenshots de debug salvos apenas localmente (gitignorados)
+## Code Style
 
-## 6. Fluxo de Desenvolvimento
+### Python (FastAPI)
+- Imports padrão → bibliotecas → locais
+- Docstrings só em funções públicas
+- Async para I/O, sync para CPU-bound
+- Named parameters em SQLAlchemy (`filter(Model.col == value)`)
+- Preferir `@field_validator` (Pydantic V2) sobre `@validator`
 
-1. **Analisar** o requisito e entender o impacto nos arquivos existentes
-2. **Consultar** `.opencode/context.md` e `.opencode/specs.md` para contexto
-3. **Seguir** as convenções existentes no código
-4. **Implementar** com testes
-5. **Verificar** com `pytest` e lint
-6. **Commit** com mensagem Conventional Commit
+### SQL
+- Upper case keywords (`SELECT`, `FROM`, `JOIN`)
+- Nomes snake_case
+- Evitar `SELECT *`
 
-## 7. Arquivos que NUNCA Devem Ser Modificados Manualmente
+### Templates (HTML)
+- Atributos HTML sem espaços extras
+- Event handlers inline só quando necessário
+- Fetch API para AJAX em vez de jQuery
 
-- `backend/static/vendor/leaflet/` — bibliotecas third-party
-- `backend/reveal.db` — dados de produção
-- `migrations/init.sql` e `migrations/seed.sql` — scripts de inicialização do PostgreSQL
-- `requirements.txt` — apenas via `pip freeze > requirements.txt`
+## Git
+- Commits curtos e descritivos no padrão do repositório
+- Não commitar secrets, arquivos temporários, cache, node_modules
+- Não commitar sem revisão do diff
 
-## 8. Performance
-
-- Queries com mais de 500ms devem ser otimizadas (índices SQL, paginação)
-- RPA lento é aceitável (latência externa), mas não deve bloquear a API principal
-- Usar `async` para operações I/O-bound na API
-- Usar `sync` para RPA (Playwright síncrono é mais estável)
+## Segurança
+- Nunca logar ou expor DATABASE_URL, API keys, tokens
+- Validar inputs em endpoints (`Query(...)`, `Path(...)`)
+- Headers CSP em todo HTML servido
+- LGPD: dados judiciais são BI anônimo

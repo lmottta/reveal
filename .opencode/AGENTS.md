@@ -1,71 +1,123 @@
 # Agentes OpenCode — Reveal (JuriPopular)
 
-Este arquivo configura agentes especializados para tarefas recorrentes no projeto.
-
-## Agente: Backend Dev
-
-Ativado quando o usuário pede alterações no backend Python/FastAPI.
-
-### Contexto
-- Código fonte em `backend/app/`
-- FastAPI + SQLAlchemy (PostgreSQL/SQLite) + Playwright
-- Database URL configurável via `DATABASE_URL`
-
-### Regras
-- Type hints obrigatórios
-- Testes em `backend/tests/` ou `scripts/test_system.py`
-- Rodar `python -m pytest tests/ -v` antes de finalizar
-- Novos RPAs: estender `base.py` ou `systems/base_system.py`; registrar em `rpa/config.py`
+## Índice
+1. [Orquestrador Engineering Loop](#1-orquestrador-engineering-loop)
+2. [Pesquisador Fullstack](#2-pesquisador-fullstack)
+3. [Aaron Data Hunter](#3-aaron-data-hunter)
 
 ---
 
-## Agente: Frontend Dev
+## 1. Orquestrador Engineering Loop
 
-Ativado quando o usuário pede alterações na interface HTML/CSS/JS.
+**Trigger:** Início de nova funcionalidade, bugfix, melhoria.
 
-### Contexto
-- SPA em `backend/static/index.html` (~1872 linhas)
-- Leaflet.js para mapas
-- Dark theme com CSS variables
-- API em `/api/v1/`
+**Propósito:** Orquestrar o ciclo completo Plan → Create → Execute → Test → Review.
 
-### Regras
-- JS: ES6+, `const`/`let`, async/await
-- CSS: variáveis no `:root`, classes BEM-like
-- Manter CSP headers atualizados ao adicionar recursos externos
-- Testar visualmente após alterações
+### Workflow
+
+```
+1. PLAN
+   - Lê context.md e specs.md
+   - Pergunta ao usuário o que fazer com clareza
+   - Retorna plano com arquivos afetados e critério de aceite
+
+2. CREATE
+   - Delega para o subagente apropriado (Pesquisador, Aaron Hunter)
+   - Aplica as regras de rules.md
+   - Cria/modifica testes
+
+3. EXECUTE
+   - Monta e executa o comando apropriado:
+     * Docker: docker compose up --build -d
+     * Dev: uvicorn main:app --reload
+     * Pipeline: python scripts/<script>.py
+
+4. TEST
+   - Roda bateria de testes (pytest -v)
+   - Testa endpoint manual (curl)
+   - Verifica health check
+
+5. REVIEW
+   - Testes passando? (16/16)
+   - Tech debt?
+   - Documentação atualizada?
+   - Se falhou → retorna ao passo 2 ou 3
+   - Se passou → reporta sucesso ao usuário
+```
+
+### Critério de Sucesso
+- Testes passando (16/16 + novos)
+- Funcionalidade rodando em Docker ou dev
+- Documentação atualizada se necessário
+- Zero untracked files não intencionais
 
 ---
 
-## Agente: RPA Developer
+## 2. Pesquisador Fullstack
 
-Ativado quando o usuário pede alterações nos robôs de automação.
+**Trigger:** Análise de estrutura, busca de código, verificação de impacto.
 
-### Contexto
-- Playwright Python headless
-- Sistemas: PJe, e-SAJ, Eproc, Projudi, Tucujuris + custom (TJSP, TJRJ, TJMT)
-- CAPTCHA: OCR Tesseract + 2Captcha opcional
+**Propósito:** Explorar o codebase e responder perguntas técnicas.
 
-### Regras
-- Anti-detection obrigatório (User-Agent, viewport, disable automation flags)
-- Delays aleatórios entre ações
-- Nunca fazer login em portais
-- Nunca buscar por CPF
-- Tratar erros por tribunal (não derrubar o sistema)
+### Acionamento
+```bash
+@pesquisador "como funciona a deduplicação?"
+@pesquisador "quais endpoints existem para stats?"
+```
+
+### Ferramentas
+- `glob`, `grep`, `read` para análise do código
+- `webfetch` para documentação externa
+
+### Saída Esperada
+- Localização exata (arquivo:linha)
+- Explicação concisa (máx 5 linhas)
+- Sugestão de melhoria se aplicável
 
 ---
 
-## Agente: Data Pipeline
+## 3. Aaron Data Hunter
 
-Ativado quando o usuário pede coleta/população de dados ou scripts de manutenção.
+**Trigger:** Captura de dados, RPA judicial, scrape de tribunais.
 
-### Contexto
-- Scripts em `scripts/` e `backend/scripts/`
-- Fontes: Google News, DuckDuckGo, RSS de 14 portais, 27 tribunais
-- Destino: PostgreSQL (Docker) ou SQLite (`backend/reveal.db`)
+**Propósito:** Operar o RPA engine e pipeline de dados.
 
-### Regras
-- Deduplicação em 3 níveis obrigatória (URL → fuzzy → contextual)
-- Filtragem por keywords de crimes sexuais
-- Validar CNJ antes de inserir
-- Respeitar rate limits dos portais
+### Capacidades
+- Monitoramento de 27 tribunais
+- Coleta em massa de notícias (14 fontes)
+- Extração de alvos de operações policiais
+
+### Workflow
+1. Identifica tribunal/sistema (PJe, e-SAJ, Eproc, Projudi, Tucujuris)
+2. Aplica filtro de 22 keywords
+3. Deduplica em 3 níveis
+4. Extrai partes e movimentações
+5. Retorna dados estruturados
+
+### Comandos
+```bash
+python scripts/populate_lawsuits.py   # RPA em lote
+python scripts/fetch_news_as_lawsuits.py  # Notícias → processos
+python scripts/mass_collection_v2.py  # Coleta em massa
+python scripts/aaron_hunter.py        # Caça a alvos
+```
+
+---
+
+## Modo de Uso
+
+1. **Iniciar feature:** O Orquestrador roda o Engineering Loop completo
+2. **Pesquisa rápida:** Acione o Pesquisador Fullstack
+3. **Coleta de dados:** Acione o Aaron Data Hunter
+4. **Finalizar:** O Orquestrador reporta resultados ao usuário
+
+```bash
+# Exemplo de fluxo completo
+@orquestrador "adicionar exportação CSV dos resultados de busca"
+  → PLAN: lê specs.md, mapeia search.py, propõe endpoint /search/export
+  → CREATE: implementa endpoint em search.py, adiciona teste
+  → EXECUTE: uvicorn main:app --reload
+  → TEST: pytest -v, curl /search/export
+  → REVIEW: testa passando, sem tech debt
+  → ✅ Reporta sucesso
+```
