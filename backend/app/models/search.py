@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, Text
 from sqlalchemy.sql import func
 from app.db.base_class import Base
 
@@ -22,12 +22,20 @@ class News(Base):
     search_id = Column(Integer, ForeignKey("search.id"))
     title = Column(String)
     url = Column(String, unique=True, index=True)
-    source = Column(String)  # Veículo de imprensa
-    author = Column(String, nullable=True) # Autor da notícia
-    snippet = Column(String) # Resumo
+    source = Column(String)
+    author = Column(String, nullable=True)
+    snippet = Column(String)
     image_url = Column(String, nullable=True)
     published_date = Column(String, nullable=True)
     city = Column(String, nullable=True)
     state = Column(String, nullable=True)
-    correlation = Column(String, nullable=True) # Correlação com processos judiciais
+    correlation = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Comment(Base):
+    __tablename__ = "comment"
+    id = Column(Integer, primary_key=True, index=True)
+    news_id = Column(Integer, ForeignKey("news.id"), index=True)
+    author = Column(String, default="Anônimo")
+    content = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

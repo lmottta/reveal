@@ -631,6 +631,127 @@
         font-weight: 600;
         z-index: 2;
       }
+      .card-links {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .card-links a {
+        font-size: 10px;
+        color: #9db8ff;
+        text-decoration: none;
+        padding: 2px 6px;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .card-links a:hover {
+        background: rgba(157, 184, 255, 0.12);
+        border-color: #9db8ff;
+      }
+      .card-parties {
+        font-size: 11px;
+        color: #b0b0c0;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-style: italic;
+      }
+      .share-bar {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+        flex-wrap: wrap;
+      }
+      .share-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: rgba(12, 12, 18, 0.9);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .share-btn:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .comments-section {
+        margin-top: 16px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+      .comments-section h4 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      .comment-form {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .comment-form input,
+      .comment-form textarea {
+        background: #0e0e14;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: inherit;
+      }
+      .comment-form textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .comment-form button {
+        padding: 10px 16px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .comment-form button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .comment-item {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 13px;
+      }
+      .comment-item:last-child {
+        border-bottom: none;
+      }
+      .comment-author {
+        font-weight: 600;
+        color: #9db8ff;
+        font-size: 12px;
+      }
+      .comment-date {
+        font-size: 10px;
+        color: var(--muted);
+        margin-left: 8px;
+      }
+      .comment-content {
+        margin-top: 4px;
+        line-height: 1.5;
+        color: #d0d0da;
+      }
       #modal-overlay {
         position: fixed;
         inset: 0;
@@ -1277,14 +1398,67 @@
         return generateNarrative()
       }
 
+      function shareUrl(platform, item) {
+        const url = item.url || window.location.href
+        const text = `${item.title || "JuriPopular - Denúncia de Crime Sexual"}`
+        const fullUrl = `${url}?ref=${platform}`
+        const encodedUrl = encodeURIComponent(fullUrl)
+        const encodedText = encodeURIComponent(text)
+        const links = {
+          whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+          twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+          facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+          telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`
+        }
+        if (platform === 'copy') {
+          navigator.clipboard.writeText(fullUrl).catch(() => {})
+          return
+        }
+        window.open(links[platform], '_blank', 'width=600,height=400')
+      }
+
+      async function loadComments(newsId, container) {
+        try {
+          const res = await fetch(`/api/v1/comments/${newsId}`)
+          if (!res.ok) return
+          const comments = await res.json()
+          container.innerHTML = comments.map(c => `
+            <div class="comment-item">
+              <span class="comment-author">${c.author}</span>
+              <span class="comment-date">${new Date(c.created_at).toLocaleDateString('pt-BR')}</span>
+              <div class="comment-content">${c.content}</div>
+            </div>
+          `).join("") || "<div style='color:var(--muted);font-size:12px;'>Nenhum comentário ainda. Seja o primeiro a comentar.</div>"
+        } catch (e) {
+          container.innerHTML = "<div style='color:var(--muted);font-size:12px;'>Erro ao carregar comentários.</div>"
+        }
+      }
+
+      async function submitComment(newsId, form) {
+        const author = form.querySelector('.comment-author-input').value.trim() || "Anônimo"
+        const content = form.querySelector('.comment-content-input').value.trim()
+        if (!content || content.length < 2) return
+        const btn = form.querySelector('button')
+        btn.disabled = true
+        btn.textContent = "Enviando..."
+        try {
+          const res = await fetch('/api/v1/comments', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({news_id: newsId, author, content})
+          })
+          if (!res.ok) throw new Error()
+          form.querySelector('.comment-content-input').value = ""
+          const container = form.parentElement.querySelector('.comments-list')
+          await loadComments(newsId, container)
+        } catch (e) {}
+        btn.disabled = false
+        btn.textContent = "Comentar"
+      }
+
       function openModal(item, trigger) {
-        const rawParties = item.partes || item.partes || []
+        const rawParties = item.partes || item.parties || []
         const parties = Array.isArray(rawParties) ? rawParties : []
-        const autor = parties.find((p) => String(p.tipo || p.role || "").toLowerCase().includes("autor"))
-        const reu = parties.find((p) => {
-          const role = String(p.tipo || p.role || "").toLowerCase()
-          return role.includes("réu") || role.includes("reu") || role.includes("passivo")
-        })
         const processNumber = item.processo || item.numero_processo || item.id || "-"
         const tribunal = item.tribunal || item.source || "Tribunal de Justiça"
         const itemType = item.type || (item.url ? "news" : "judicial")
@@ -1297,12 +1471,6 @@
         
         const published = item.published_date || item.data_distribuicao || item.created_at || "-"
         const status = item.status || item.situacao || "-"
-        const movements = Array.isArray(item.movimentacoes) ? item.movimentacoes : []
-        const movementPreview = movements.slice(0, 5).map((mv, index) => {
-          const date = mv?.data || mv?.date || "-"
-          const content = mv?.conteudo || mv?.content || "-"
-          return `${index + 1}. ${date} - ${content}`
-        }).join("<br/>") || "-"
         const partiesText = parties.slice(0, 10).map((p) => {
           const role = p?.tipo || p?.role || "Parte"
           const name = p?.nome || p?.name || "-"
@@ -1310,30 +1478,13 @@
         }).join("<br/>") || (typeof rawParties === "string" ? rawParties : "-")
         
         const storytelling = generateStorytelling(item, itemType)
-        
-        const detailBlocks = itemType === "news"
-          ? [
-              { label: "Fonte", value: item.source || "-" },
-              { label: "Data da Publicação", value: published || "-" },
-              { label: "Local do Fato", value: cityState || "-" },
-              { label: "Ver no Mapa", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">📍 ${cityQuery}</a>` : cityState || "-" }
-            ]
-          : [
-              { label: "Processo", value: processNumber },
-              { label: "Classe", value: item.classe || item.title || "-" },
-              { label: "Assunto", value: item.assunto || item.snippet || "-" },
-              { label: "Tribunal", value: tribunal || "-" },
-              { label: "Vara/Foro", value: item.vara || item.foro || "-" },
-              { label: "Juiz", value: item.juiz || item.judge || "-" },
-              { label: "Status", value: status || "-" },
-              { label: "Data de Distribuição", value: item.data_distribuicao || item.published_date || "-" },
-              { label: "Última Movimentação", value: item.data_ultima_movimentacao || "-" },
-              { label: "Local", value: cityState || "-" },
-              { label: "Ver no Mapa", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">📍 ${cityQuery}</a>` : cityState || "-" }
-            ]
-
         const sourceUrl = item.url || ""
         const displayUrl = sourceUrl.length > 60 ? sourceUrl.substring(0, 60) + "..." : sourceUrl
+
+        const denunciaLink = state ? `https://www.gov.br/mj/pt-br/denuncia-violencia` : "#"
+        const orgLink = item.source && item.source !== "Google News"
+          ? `https://www.google.com/search?q=${encodeURIComponent(item.source)}`
+          : (item.tribunal ? `https://www.${item.tribunal.toLowerCase()}.jus.br` : "#")
 
         modalContent.innerHTML = `
           <div class="modal-header">
@@ -1347,25 +1498,48 @@
             <span class="tag">ID: ${processNumber}</span>
             <button type="button" id="copy-process">Copiar ID</button>
           </div>
-          <div class="storytelling-box">
-            ${storytelling}
-          </div>
+          <div class="storytelling-box">${storytelling}</div>
           <div class="detail-grid">
-            ${detailBlocks.map(block => `
-                <div class="detail-box">
-                  <strong>${block.label}</strong>
-                  <div>${block.value}</div>
-                </div>`).join("")}
+            ${[{ label: "Fonte", value: item.source || "-" },
+               { label: "Data", value: published || "-" },
+               { label: "Local", value: cityState || "-" },
+               { label: "Ver no Mapa", value: geoLink ? `<a class="detail-link" href="${geoLink}" target="_blank" rel="noopener noreferrer">📍 ${cityQuery}</a>` : cityState || "-" },
+               ...(partiesText !== "-" ? [{ label: "Envolvidos", value: partiesText }] : []),
+               ...(itemType !== "news" ? [{ label: "Status", value: status || "-" }] : [])
+            ].map(b => `<div class="detail-box"><strong>${b.label}</strong><div>${b.value}</div></div>`).join("")}
           </div>
-          ${item.url ? `<div class="detail-box source-link-box"><strong>🗞️ Acessar Fonte Original</strong><a href="${item.url}" target="_blank" rel="noopener noreferrer" class="source-link">🔗 ${displayUrl}</a></div>` : ""}
+          ${sourceUrl ? `<div class="detail-box source-link-box"><strong>🗞️ Acessar Fonte Original</strong><a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="source-link">🔗 ${displayUrl}</a></div>` : ""}
+          <div class="detail-box" style="border-color:var(--accent);margin-top:8px;">
+            <strong>🛡️ Canais de Denúncia</strong>
+            <a href="${denunciaLink}" target="_blank" rel="noopener noreferrer" style="color:#ff6b6b;display:block;margin-top:6px;font-size:12px;">📢 Denunciar ao Governo Federal</a>
+            <a href="https://disque100.gov.br" target="_blank" rel="noopener noreferrer" style="color:#ff6b6b;display:block;font-size:12px;">📞 Disque 100 - Direitos Humanos</a>
+            <a href="${orgLink}" target="_blank" rel="noopener noreferrer" style="color:#9db8ff;display:block;font-size:12px;">⚖️ ${item.source || tribunal}</a>
+          </div>
+          <div class="share-bar">
+            <a class="share-btn" onclick="shareUrl('whatsapp', ${JSON.stringify(item).replace(/"/g,'&quot;')})">📱 WhatsApp</a>
+            <a class="share-btn" onclick="shareUrl('twitter', ${JSON.stringify(item).replace(/"/g,'&quot;')})">🐦 Twitter</a>
+            <a class="share-btn" onclick="shareUrl('facebook', ${JSON.stringify(item).replace(/"/g,'&quot;')})">📘 Facebook</a>
+            <a class="share-btn" onclick="shareUrl('telegram', ${JSON.stringify(item).replace(/"/g,'&quot;')})">✈️ Telegram</a>
+            <a class="share-btn" onclick="shareUrl('copy', ${JSON.stringify(item).replace(/"/g,'&quot;')})">🔗 Copiar Link</a>
+          </div>
+          <div class="comments-section">
+            <h4>Comentários</h4>
+            <div class="comment-form">
+              <input class="comment-author-input" type="text" placeholder="Seu nome (opcional)" maxlength="50" />
+              <textarea class="comment-content-input" placeholder="Compartilhe sua opinião ou informação sobre este caso..." maxlength="1000"></textarea>
+              <button onclick="submitComment(${item.id}, this.closest('.comment-form'))">Comentar</button>
+            </div>
+            <div class="comments-list"></div>
+          </div>
         `
-        
+
         modalContent.querySelector("#modal-close").addEventListener("click", closeModal)
         modalContent.querySelector("#copy-process").addEventListener("click", () => copyProcessId(processNumber))
         
         modalOverlay.classList.add("open")
         modalOverlay.setAttribute("aria-hidden", "false")
         positionModal(trigger)
+        loadComments(item.id, modalContent.querySelector('.comments-list'))
       }
 
       // --- Catalog Rendering ---
@@ -1460,7 +1634,11 @@
           const thumbStyle = item.image_url ? `style="background-image:url('${item.image_url}')"` : ""
           const iconEmoji = isNews ? "📰" : "⚖️"
           const locationText = item.state ? (item.city ? `${item.city} - ${item.state}` : item.state) : "Nacional"
-          
+          const sourceUrl = item.url || ""
+          const displayUrl = sourceUrl.length > 50 ? sourceUrl.substring(0, 50) + "..." : sourceUrl
+          const parties = item.partes || item.parties || []
+          const partiesText = Array.isArray(parties) ? parties.slice(0, 2).map(p => p.nome || p.name || "").filter(Boolean).join(", ") : ""
+
           card.innerHTML = `
             <div class="card-thumb" ${thumbStyle}>
               ${!item.image_url ? iconEmoji : ''}
@@ -1473,6 +1651,8 @@
               </div>
               <div class="card-title">${item.title || item.classe || "Processo Judicial"}</div>
               <div class="card-snippet">${item.snippet || item.assunto || "Sem descrição"}</div>
+              ${partiesText ? `<div class="card-parties">${partiesText}</div>` : ""}
+              ${sourceUrl ? `<div class="card-links"><a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">🔗 Fonte</a></div>` : ""}
               <div class="card-action">
                 <button type="button">VER MAIS</button>
               </div>
