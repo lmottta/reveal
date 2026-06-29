@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, get_db
 from app.models.search import SearchResult, News, Search
 from app.models.lawsuit import Lawsuit
 import json
@@ -35,12 +35,6 @@ def parse_terms(raw: str | None) -> list[str]:
         return []
     return [term.strip() for term in raw.replace(",", "|").split("|") if term.strip()]
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 CITY_CACHE = {}
 

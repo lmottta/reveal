@@ -7,7 +7,7 @@ from app.rpa.tjmt import TJMTRPA
 from app.rpa.google_news import GoogleNewsRPA
 from app.rpa.google_web import GoogleWebRPA
 from app.rpa.news_aggregator import NewsAggregatorRPA
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, get_db
 from app.models.search import Search, SearchResult, News
 from app.models.lawsuit import Lawsuit
 from app.core.constants import TRIBUNAL_TO_STATE, COORDS, CNJ_CODE_MAP
@@ -78,12 +78,6 @@ def parse_terms(raw: str | None) -> list[str]:
         return []
     return [term.strip() for term in raw.replace(",", "|").split("|") if term.strip()]
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 def search_local_db(query: str, db: Session) -> dict:
     """
