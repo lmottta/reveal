@@ -26,6 +26,7 @@ from app.models.search import Search, News
 from app.models.lawsuit import Lawsuit
 from app.db.base import Base
 from app.core.constants import STATE_COORDS
+from app.utils.enricher import enrich_news_item, clean_text
 
 Base.metadata.create_all(bind=engine)
 print("Database initialized.")
@@ -337,14 +338,15 @@ def fetch_from_google_rss(query: str, max_items: int = 50) -> list:
             snippet = re.sub(r"\s+", " ", snippet).strip()
             
             if clean_title and link:
-                items.append({
+                item = enrich_news_item({
                     "title": clean_title,
                     "url": link,
                     "source": source,
-                    "snippet": snippet[:300] if snippet else "",
+                    "snippet": snippet[:500] if snippet else "",
                     "published_date": pub_date,
                     "image_url": None
                 })
+                items.append(item)
     except Exception as e:
         print(f"  RSS Error for '{query}': {e}")
     return items
@@ -371,14 +373,15 @@ def fetch_from_source_rss(source_key: str, max_items: int = 20) -> list:
             snippet = re.sub(r"\s+", " ", snippet).strip()[:300]
             
             if title and link:
-                items.append({
+                item = enrich_news_item({
                     "title": title,
                     "url": link,
                     "source": source["name"],
-                    "snippet": snippet,
+                    "snippet": snippet[:500],
                     "published_date": pub_date,
                     "image_url": None
                 })
+                items.append(item)
     except Exception as e:
         print(f"  RSS Error for {source_key}: {e}")
     
