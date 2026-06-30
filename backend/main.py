@@ -37,7 +37,7 @@ async def add_security_headers(request: Request, call_next):
         "connect-src *; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; "
         "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; "
-        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com http://*.basemaps.cartocdn.com; "
+        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com http://*.basemaps.cartocdn.com https://lh3.googleusercontent.com https://www.google.com https://*.google.com; "
         "font-src 'self' https://fonts.gstatic.com data:;"
         "form-action 'self' https://wa.me https://twitter.com https://facebook.com https://t.me https://www.gov.br https://disque100.gov.br https://www.google.com;"
     )
@@ -238,6 +238,82 @@ def daily_scan():
         return {"status": "success", "new_items": total}
     except Exception as e:
         return {"status": "error", "message": str(e), "new_items": total}
+    finally:
+        db.close()
+
+import requests as req_lib
+from bs4 import BeautifulSoup
+
+JUSBRAZIL_TERMS = [
+    "estupro de vulnerável", "abuso sexual", "crime sexual",
+    "exploração sexual", "pedofilia", "estupro"
+]
+
+JUSBRAZIL_TRIBUNAL_MAP = {
+    "TJSP": "SP", "TJRJ": "RJ", "TJMG": "MG", "TJRS": "RS",
+    "TJPR": "PR", "TJBA": "BA", "TJDF": "DF", "TJPE": "PE",
+    "TJCE": "CE", "TJMT": "MT", "TJGO": "GO", "TJMA": "MA",
+    "TJPA": "PA", "TJSC": "SC", "TJES": "ES", "TJRN": "RN",
+    "TJPB": "PB", "TJPI": "PI", "TJAL": "AL", "TJSE": "SE",
+    "TJRO": "RO", "TJAC": "AC", "TJAM": "AM", "TJRR": "RR",
+    "TJTO": "TO", "TJAP": "AP", "STJ": "DF", "STF": "DF"
+}
+
+@app.post("/api/v1/admin/fetch-tribunal-cases")
+def fetch_tribunal_cases():
+    db = SessionLocal()
+    try:
+        search_record = Search(query="TRIBUNAIS_REAIS", tribunal="JusBrasil")
+        db.add(search_record)
+        db.commit()
+        db.refresh(search_record)
+        seen_urls = set(u for u, in db.query(News.url).all() if u)
+        total = 0
+        for termo in JUSBRAZIL_TERMS[:4]:
+            q = termo.replace(" ", "+")
+            url = f"https://www.jusbrasil.com.br/jurisprudencia/busca?q={q}"
+            try:
+                resp = req_lib.get(url, headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                }, timeout=15)
+                if resp.status_code != 200:
+                    continue
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.select(".BaseStyles__Card-sc-1rb3k2v-0") or soup.select("[class*='ResultItem']") or soup.select("article")
+                for card in cards[:8]:
+                    title_el = card.select_one("h2, h3, [class*='Title']")
+                    link_el = card.select_one("a[href]")
+                    snippet_el = card.select_one("p, [class*='Snippet']")
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    link = link_el["href"] if link_el and link_el.has_attr("href") else ""
+                    snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+                    if not title or (link and link in seen_urls):
+                        continue
+                    uf = None
+                    for sigla, st in JUSBRAZIL_TRIBUNAL_MAP.items():
+                        if sigla in (snippet or "").upper() or sigla in title.upper():
+                            uf = st
+                            break
+                    try:
+                        db.add(News(
+                            search_id=search_record.id,
+                            title=clean_text(title[:200]),
+                            url=link or url,
+                            source="JusBrasil",
+                            snippet=clean_text(snippet[:400]),
+                            state=uf,
+                        ))
+                        seen_urls.add(link)
+                        total += 1
+                    except Exception:
+                        pass
+                time.sleep(2)
+            except Exception:
+                continue
+        db.commit()
+        return {"status": "success", "cases": total}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
     finally:
         db.close()
 
